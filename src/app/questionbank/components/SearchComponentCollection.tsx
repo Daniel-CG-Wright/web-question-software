@@ -1,65 +1,38 @@
 "use client"
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import qs from "query-string";
 import SearchInput from "./SearchBar";
 import TopicsCombobox from "./TopicsCombobox";
 import LevelSelect from "./LevelSelect";
 import ComponentSelect from "./ComponentSelect";
-import useDebounce from "@/hooks/useDebounce";
+
 
 interface SearchComponentCollectionProps {
   topics: string[];
+    selectedTopic: string;
+    setSelectedTopic: (topic: string) => void;
+    value: string;
+    setValue: (value: string) => void;
+    selectedLevel: string;
+    setSelectedLevel: (level: string) => void;
+    selectedComponent: string;
+    setSelectedComponent: (component: string) => void;
+    levels: string[];
+    components: string[];
 }
 
 const SearchComponentCollection: React.FC<SearchComponentCollectionProps> = ({
   topics,
+  selectedTopic,
+    setSelectedTopic,
+    value,
+    setValue,
+    selectedLevel,
+    setSelectedLevel,
+    selectedComponent,
+    setSelectedComponent,
+    levels,
+    components,
 }) => {
-  const router = useRouter();
-  const [value, setValue] = useState("");
-  const [selectedTopic, setSelectedTopic] = useState("");
-  const [selectedLevel, setSelectedLevel] = useState("");
-  const [selectedComponent, setSelectedComponent] = useState("");
-  const debouncedValue = useDebounce(value, 500);
-
-  let levels = ["A", "AS"];
-  let components = ["Component 1", "Component 2"];
-  useEffect(() => {
-    // if all the search criteria are default, then don't search
-    let query = {};
-    if (
-        debouncedValue === "" &&
-        selectedTopic === "" &&
-        selectedLevel === "" &&
-        selectedComponent === ""
-    ) {
-        query = {};
-    }
-    else
-    {
-        query = {
-            id: -1,
-            text: debouncedValue,
-            topics: selectedTopic,
-            level: selectedLevel,
-            component: selectedComponent,
-            minMarks: -1,
-            maxMarks: 100,
-            paperYear: "",
-            searchInMarkscheme: false,
-            };
-    }
-
-    const url = qs.stringifyUrl({
-      url: "/questionbank",
-      query,
-    });
-
-    router.push(url);
-  }, [debouncedValue, router, selectedTopic, selectedLevel, selectedComponent]);
-
-
-
 
   return (
     <div className="

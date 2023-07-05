@@ -60,3 +60,16 @@ Also disable the dropdown arrow from highlighting when hovered by doing pointer-
     }
   
   }
+
+  .toggle-switch-handle {
+    background-color: white;
+  }
+
+  .toggle-switch-handle:focus {
+    outline: none;
+  }
+
+  input:checked ~ .toggle-switch-label .toggle-switch-handle {
+    transform: translateX(100%);
+    background-color: #4dc3ff;
+  }

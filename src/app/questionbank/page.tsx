@@ -1,4 +1,4 @@
-import SearchComponentCollection from "./components/SearchComponentCollection";
+import QuestionOutputArea from "./components/QuestionClientArea";
 import QuestionTable from "./components/QuestionTable";
 import searchQuestions from "@/actions/searchQuestions";
 import getTopics from "@/actions/getTopics";
@@ -16,6 +16,8 @@ interface SearchProps {
         maxMarks: number;
         paperYear: string;
         searchInMarkscheme: boolean;
+        displayAsImages: boolean;
+        displayMarkscheme: boolean;
     }
 };
 
@@ -26,8 +28,11 @@ const Search: React.FC<SearchProps> = async ({ searchParams }) => {
 
     return (
         <>
-            <SearchComponentCollection topics={topics}/>
-            <QuestionTable questions={questions} />
+            <QuestionOutputArea
+                selectedQuestionCode={-1}
+                topics={topics}
+                questionTable={<QuestionTable questions={questions} />}
+            />
         </>
     );
 
