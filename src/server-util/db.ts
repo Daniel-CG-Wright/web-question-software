@@ -1,46 +1,70 @@
-// server/db.js
-// MySQL handling, exported functions are used to
-// abstract away the database calls from the pages
-const mysql = require('mysql');
-const util = require('./util/util.js');
+import mysql from 'mysql';
 
 // Create a connection to the database
 const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'program',
-    password: '',
-    database: 'ExamQuestions',
-    port: "3306"
+  host: 'localhost',
+  user: 'program',
+  password: '',
+  database: 'ExamQuestions',
+  port: 3306,
 });
+
+interface Question {
+  QuestionID: number;
+  PaperCode: string;
+  QuestionNumber: number;
+  QuestionText: string;
+  TotalMarks: number;
+  Topics: string;
+}
+
+interface Image {
+  id: number;
+  isMS: boolean;
+}
+
+interface Text {
+  questionText: string;
+  markschemeText: string;
+}
 
 /**
  * This function is used to perform a parameterized query to get data
  * @param {string} query - The query to be executed
- * @param {array} params - The parameters to be used in the query
- * @returns {Promise} - The promise resolves to the result of the query
+ * @param {any[]} params - The parameters to be used in the query
+ * @returns {Promise<any>} - The promise resolves to the result of the query
  */
-function selectQuery(query, params) {
-    return new Promise((resolve, reject) => {
-        connection.query(query, params, (err, result) => {
-            if (err) reject(err);
-            resolve(result);
-        });
+function selectQuery(query: string, params: any[]): Promise<any> {
+  return new Promise((resolve, reject) => {
+    connection.query(query, params, (err, result) => {
+      if (err) reject(err);
+      resolve(result);
     });
+  });
 }
 
+
+/**
+ * Sanitize a string
+ * @param {string} str - The string to be sanitized
+ * @returns {string} - The sanitized string
+ */
+function sanitize(str: string): string {
+    return str.replace(/[^A-Za-z0-9\s.,?!()\-_'"]/, '');
+}
+    
 /**
  * Take search criteria and return an array of questions
- * @param {object} search - The search criteria
- * @returns {Promise} - The promise resolves to the result of the query
+ * @param {object} criteria - The search criteria
+ * @returns {Promise<Question[]>} - The promise resolves to the result of the query
  */
-function getQuestions(criteria) 
-{
-    let { search, topics, component, level, minMarks, maxMarks, questionID, markscheme, paperYear } = criteria;
-    // if topics is a string, convert to an array with one element
-    if (typeof topics === 'string') topics = [topics];
-    
-    // create the query based on search criteria
-    let query = `
+function getQuestions(criteria: any): Promise<Question[]> {
+  let { search, topics, component, level, minMarks, maxMarks, questionID, markscheme, paperYear } = criteria;
+  // if topics is a string, convert to an array with one element
+  if (typeof topics === 'string') topics = [topics];
+
+  // create the query based on search criteria
+  let query = `
     SELECT
         Question.QuestionID AS QuestionID,
         CONCAT(Paper.PaperYear, '-', Paper.PaperComponent, '-', Paper.PaperLevel) AS PaperCode,
@@ -61,79 +85,69 @@ function getQuestions(criteria)
         LEFT JOIN QuestionTopic ON Question.QuestionID = QuestionTopic.QuestionID
     WHERE
         `;
-    
-    let conditions = [];
 
-    if (search)
-    {
-        // escape single quotes in search string
-        search = search.replace(/'/g, "''");
-        // sanitise search string
-        search = util.sanitize(search);
-        // use like query to search for search string in question text
-        // NOTE this could be improved with better search functionality
-        conditions.push(`Question.QuestionContents LIKE '%${search}%'`);
+  let conditions: string[] = [];
+
+  if (search) {
+    // escape single quotes in search string
+    search = search.replace(/'/g, "''");
+    // sanitise search string
+    search = sanitize(search);
+    // use like query to search for search string in question text
+    // NOTE this could be improved with better search functionality
+    conditions.push(`Question.QuestionContents LIKE '%${search}%'`);
+  }
+
+  if (topics && topics.length > 0) {
+    // add each topic to the conditions array
+    let topicQueries = topics.map((topic: string) => `QuestionTopic.TopicID = ${topic}`);
+    // join the topic queries with OR
+    conditions.push(`(${topicQueries.join(' OR ')})`);
+  }
+
+  if (component) {
+    let components: string[] = [component];
+    // if component 1, add "unit 1" and "unit 3" to extra components
+    if (component.toLowerCase() === 'component 1') {
+      components.push('unit 1');
+      components.push('unit 3');
     }
-
-    if (topics && topics.length > 0)
-    {
-        // add each topic to the conditions array
-        let topicQueries = topics.map(topic => `QuestionTopic.TopicID = ${topic}`);
-        // join the topic queries with OR
-        conditions.push(`(${topicQueries.join(' OR ')})`);
-
+    // if component 2, add "unit 2" and "unit 4" to extra components
+    else if (component.toLowerCase() === 'component 2') {
+      components.push('unit 2');
+      components.push('unit 4');
     }
+    // add each component to the conditions array
+    let componentQueries = components.map((component: string) => `Paper.PaperComponent = '${component}'`);
+    // join the component queries with OR
+    conditions.push(`(${componentQueries.join(' OR ')})`);
+  }
 
-    if (component)
-    {
-        let components = [component];
-        // if component 1, add "unit 1" and "unit 3" to extra components
-        if (component.toLowerCase() === 'component 1')
-        {
-            components.push('unit 1');
-            components.push('unit 3');
-        }
-        // if component 2, add "unit 2" and "unit 4" to extra components
-        else if (component.toLowerCase() === 'component 2')
-        {
-            components.push('unit 2');
-            components.push('unit 4');
-        }
-        // add each component to the conditions array
-        let componentQueries = components.map(component => `Paper.PaperComponent = '${component}'`);
-        // join the component queries with OR
-        conditions.push(`(${componentQueries.join(' OR ')})`);
-    }
+  if (level) {
+    conditions.push(`Paper.PaperLevel = '${level}'`);
+  }
 
-    if (level)
-    {
-        conditions.push(`Paper.PaperLevel = '${level}'`);
-    }
+  // add min and max marks
+  conditions.push(`Question.TotalMarks >= ${minMarks}`);
+  conditions.push(`Question.TotalMarks <= ${maxMarks}`);
 
-    // add min and max marks
-    conditions.push(`Question.TotalMarks >= ${minMarks}`);
-    conditions.push(`Question.TotalMarks <= ${maxMarks}`);
+  if (questionID > -1) {
+    conditions.push(`Question.QuestionID = ${questionID}`);
+  }
 
-    if (questionID > -1)
-    {
-        conditions.push(`Question.QuestionID = ${questionID}`);
-    }
+  if (markscheme) {
+    conditions.push(`Question.Markscheme = '${markscheme}'`);
+  }
 
-    if (markscheme)
-    {
-        conditions.push(`Question.Markscheme = '${markscheme}'`);
-    }
+  if (paperYear) {
+    conditions.push(`Paper.PaperYear = ${paperYear}`);
+  }
 
-    if (paperYear)
-    {
-        conditions.push(`Paper.PaperYear = ${paperYear}`);
-    }
+  // join the conditions with AND
+  query += conditions.join(' AND ');
 
-    // join the conditions with AND
-    query += conditions.join(' AND ');
-
-    // add group by and order by
-    query += `
+  // add group by and order by
+  query += `
     GROUP BY
     Question.QuestionID,
     Paper.PaperYear,
@@ -145,40 +159,36 @@ function getQuestions(criteria)
     ORDER BY
         Question.QuestionID ASC;
     `;
-    return new Promise((resolve, reject) => {
-        selectQuery(query, [])
-        .then((results) => {
-            let questions = [];
-            results.forEach((row) => {
-                questions.push(
-                {
-                    row.QuestionID,
-                    row.PaperCode,
-                    row.QuestionNumber,
-                    row.QuestionText,
-                    row.TotalMarks,
-                    row.Topics
-                }
-                );
-            });
-            resolve(questions);
-        })
-        .catch((err) => {
-            reject(err);
+
+  return new Promise((resolve, reject) => {
+    selectQuery(query, [])
+      .then((results) => {
+        let questions: Question[] = [];
+        results.forEach((row: any) => {
+          questions.push({
+            QuestionID: row.QuestionID,
+            PaperCode: row.PaperCode,
+            QuestionNumber: row.QuestionNumber,
+            QuestionText: row.QuestionText,
+            TotalMarks: row.TotalMarks,
+            Topics: row.Topics,
+          });
         });
-    });
-
+        resolve(questions);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
 }
-
 
 /**
  * This gets all the topics strings from the database
- * @returns {array} - an array of topic strings
+ * @returns {Promise<string[]>} - an array of topic strings
  */
-function getTopics() 
-{
-    return new Promise((resolve, reject) => {
-      let query = `
+function getTopics(): Promise<string[]> {
+  return new Promise((resolve, reject) => {
+    let query = `
         SELECT
           DISTINCT TopicID
         FROM
@@ -186,26 +196,26 @@ function getTopics()
         ORDER BY
           TopicID;
       `;
-      selectQuery(query, [])
-        .then((results) => {
-          let topics = results.map(row => row.TopicID);
-          resolve(topics);
-        })
-        .catch(error => {
-          reject(error);
-        });
-    });
+    selectQuery(query, [])
+      .then((results) => {
+        let topics = results.map((row: any) => row.TopicID);
+        resolve(topics);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
 }
 
 /**
  * This gets the array of images for a questionID.
  * @param {number} questionID - the questionID to get the images for
- * @returns {Promise} - a promise for the results of the query - a structure containing the imageID and whether it is part of the markscheme
+ * @returns {Promise<Image[]>} - a promise for the results of the query - a structure containing the imageID and whether it is part of the markscheme
  */
-function getImages(questionID) {
-    // images are stored as blob data
-    // get all images for a question
-    let query = `
+function getImages(questionID: number): Promise<Image[]> {
+  // images are stored as blob data
+  // get all images for a question
+  let query = `
     SELECT
         Images.ImageID AS ImageID,
         Images.IsPartOfMarkscheme AS IsPartOfMarkscheme
@@ -217,96 +227,44 @@ function getImages(questionID) {
         Images.ImageNumber ASC;
     `;
 
-    return selectQuery(query, [questionID])
-        .then((results) => {
-            let images = [];
-            results.forEach((row) => {
-                images.push(
-                    {
-                        id: row.ImageID,
-                        isMS: row.IsPartOfMarkscheme
-                    }
-                    );
-            }
-            );
-            return images;
-        }
-    );
+  return selectQuery(query, [questionID])
+    .then((results) => {
+      let images: Image[] = [];
+      results.forEach((row: any) => {
+        images.push({
+          id: row.ImageID,
+          isMS: row.IsPartOfMarkscheme,
+        });
+      });
+      return images;
+    });
 }
 
-
 /**
- * Get the question and markscheme text for a questionID
+ * This gets the text for a questionID.
  * @param {number} questionID - the questionID to get the text for
- * @returns {Promise} - a promise for the results of the query - an object with question and markscheme text
+ * @returns {Promise<Text>} - a promise for the results of the query - a structure containing the question text and markscheme text
  */
-function getText(questionID) {
-    // get the question and markscheme text for a question
-    let query = `
+function getText(questionID: number): Promise<Text> {
+  // get the question text and markscheme text for a question
+  let query = `
     SELECT
-        Question.QuestionContents AS QuestionText,
-        Question.MarkschemeContents AS MarkschemeText
+        QuestionContents AS questionText,
+        Markscheme AS markschemeText
     FROM
         Question
     WHERE
-        Question.QuestionID = ?;
+        QuestionID = ?;
     `;
-    return selectQuery(query, [questionID])
-        .then((results) => {
-            // return the text if possible, otherwise return "No text found"
-            return {
-                questionText: results[0].QuestionText || "No text found",
-                markschemeText: results[0].MarkschemeText || "No text found"
-            };
-        }
-    );
+
+  return selectQuery(query, [questionID])
+    .then((results) => {
+      let text: Text = {
+        questionText: results[0].questionText,
+        markschemeText: results[0].markschemeText,
+      };
+      return text;
+    });
 }
 
-/**
- * Gets all the years for the papers in the database
- * @returns {Promise} - a promise for the results of the query - an array of years
- */
-function getYears() {
-    let query = `
-    SELECT
-        DISTINCT PaperYear
-    FROM
-        Paper
-    ORDER BY
-        PaperYear DESC;
-    `;
-    return selectQuery(query, [])
-        .then((results) => {
-            let years = results.map(row => row.PaperYear);
-            return years;
-        }
-    );
-}
-
-/**
- * Function to get the maximum questionID in the database
- * @returns {Promise} - a promise for the results of the query - the maximum questionID
- */
-function getMaxQuestionID() {
-    let query = `
-    SELECT
-        MAX(QuestionID) AS MaxQuestionID
-    FROM
-        Question;
-    `;
-    return selectQuery(query, [])
-        .then((results) => {
-            return results[0].MaxQuestionID;
-        }
-    );
-}
-
-module.exports = {
-    getQuestions,
-    getTopics,
-    getImages,
-    getText,
-    getYears,
-    getMaxQuestionID
-}
-
+export { getQuestions, getTopics, getImages, getText };
