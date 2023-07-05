@@ -1,4 +1,6 @@
 import mysql from 'mysql';
+import { SearchCriteria, Question } from '@/types';
+import { Search } from 'aws-sdk/clients/kendra';
 
 // Create a connection to the database
 const connection = mysql.createConnection({
@@ -8,15 +10,6 @@ const connection = mysql.createConnection({
   database: 'ExamQuestions',
   port: 3306,
 });
-
-interface Question {
-  QuestionID: number;
-  PaperCode: string;
-  QuestionNumber: number;
-  QuestionText: string;
-  TotalMarks: number;
-  Topics: string;
-}
 
 interface Image {
   id: number;
@@ -58,8 +51,9 @@ function sanitize(str: string): string {
  * @param {object} criteria - The search criteria
  * @returns {Promise<Question[]>} - The promise resolves to the result of the query
  */
-function getQuestions(criteria: any): Promise<Question[]> {
-  let { search, topics, component, level, minMarks, maxMarks, questionID, markscheme, paperYear } = criteria;
+function dbGetQuestions(criteria: SearchCriteria): Promise<Question[]> {
+  console.log("criteria: ", criteria);
+  let { text, topics, component, level, minMarks, maxMarks, id, searchInMarkscheme, paperYear } = criteria;
   // if topics is a string, convert to an array with one element
   if (typeof topics === 'string') topics = [topics];
 
@@ -88,14 +82,14 @@ function getQuestions(criteria: any): Promise<Question[]> {
 
   let conditions: string[] = [];
 
-  if (search) {
+  if (text) {
     // escape single quotes in search string
-    search = search.replace(/'/g, "''");
+    text = text.replace(/'/g, "''");
     // sanitise search string
-    search = sanitize(search);
+    text = sanitize(text);
     // use like query to search for search string in question text
     // NOTE this could be improved with better search functionality
-    conditions.push(`Question.QuestionContents LIKE '%${search}%'`);
+    conditions.push(`Question.QuestionContents LIKE '%${text}%'`);
   }
 
   if (topics && topics.length > 0) {
@@ -131,12 +125,12 @@ function getQuestions(criteria: any): Promise<Question[]> {
   conditions.push(`Question.TotalMarks >= ${minMarks}`);
   conditions.push(`Question.TotalMarks <= ${maxMarks}`);
 
-  if (questionID > -1) {
-    conditions.push(`Question.QuestionID = ${questionID}`);
+  if (id > -1) {
+    conditions.push(`Question.QuestionID = ${id}`);
   }
 
-  if (markscheme) {
-    conditions.push(`Question.Markscheme = '${markscheme}'`);
+  if (searchInMarkscheme) {
+    conditions.push(`Question.Markscheme = '${text}'`);
   }
 
   if (paperYear) {
@@ -160,18 +154,20 @@ function getQuestions(criteria: any): Promise<Question[]> {
         Question.QuestionID ASC;
     `;
 
+  console.log(query);
   return new Promise((resolve, reject) => {
     selectQuery(query, [])
       .then((results) => {
         let questions: Question[] = [];
         results.forEach((row: any) => {
           questions.push({
-            QuestionID: row.QuestionID,
-            PaperCode: row.PaperCode,
-            QuestionNumber: row.QuestionNumber,
-            QuestionText: row.QuestionText,
-            TotalMarks: row.TotalMarks,
-            Topics: row.Topics,
+            id: row.QuestionID,
+            paperCode: row.PaperCode,
+            number: row.QuestionNumber,
+            text: row.QuestionText,
+            marks: row.TotalMarks,
+            topics: row.Topics,
+            markscheme: ''
           });
         });
         resolve(questions);
@@ -186,7 +182,7 @@ function getQuestions(criteria: any): Promise<Question[]> {
  * This gets all the topics strings from the database
  * @returns {Promise<string[]>} - an array of topic strings
  */
-function getTopics(): Promise<string[]> {
+function dbGetTopics(): Promise<string[]> {
   return new Promise((resolve, reject) => {
     let query = `
         SELECT
@@ -212,7 +208,7 @@ function getTopics(): Promise<string[]> {
  * @param {number} questionID - the questionID to get the images for
  * @returns {Promise<Image[]>} - a promise for the results of the query - a structure containing the imageID and whether it is part of the markscheme
  */
-function getImages(questionID: number): Promise<Image[]> {
+function dbGetImages(questionID: number): Promise<Image[]> {
   // images are stored as blob data
   // get all images for a question
   let query = `
@@ -245,7 +241,7 @@ function getImages(questionID: number): Promise<Image[]> {
  * @param {number} questionID - the questionID to get the text for
  * @returns {Promise<Text>} - a promise for the results of the query - a structure containing the question text and markscheme text
  */
-function getText(questionID: number): Promise<Text> {
+function dbGetText(questionID: number): Promise<Text> {
   // get the question text and markscheme text for a question
   let query = `
     SELECT
@@ -267,4 +263,4 @@ function getText(questionID: number): Promise<Text> {
     });
 }
 
-export { getQuestions, getTopics, getImages, getText };
+export { dbGetQuestions, dbGetTopics, dbGetImages, dbGetText };

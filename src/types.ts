@@ -6,17 +6,16 @@ export interface SearchCriteria {
     component: string,
     minMarks: number,
     maxMarks: number,
-    paperYear: number,
+    paperYear: string,
     searchInMarkscheme: boolean
 }
 
 export interface Question {
     id: number,
     text: string,
+    number: number,
     topics: string[],
-    level: string,
-    component: string,
+    paperCode: string,
     marks: number,
-    paperYear: number,
     markscheme: string,
 }
