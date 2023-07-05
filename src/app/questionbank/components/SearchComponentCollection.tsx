@@ -22,40 +22,44 @@ const SearchComponentCollection: React.FC<SearchComponentCollectionProps> = ({
   const [selectedComponent, setSelectedComponent] = useState("");
   const debouncedValue = useDebounce(value, 500);
 
+  let levels = ["A", "AS"];
+  let components = ["Component 1", "Component 2"];
   useEffect(() => {
-    const query = {
-        id: -1,
-        text: debouncedValue,
-        topics: [selectedTopic],
-        level: selectedLevel,
-        component: selectedComponent,
-        minMarks: -1,
-        maxMarks: 100,
-        paperYear: -1,
-        searchInMarkscheme: false,
-        };
+    // if all the search criteria are default, then don't search
+    let query = {};
+    if (
+        debouncedValue === "" &&
+        selectedTopic === "" &&
+        selectedLevel === "" &&
+        selectedComponent === ""
+    ) {
+        query = {};
+    }
+    else
+    {
+        query = {
+            id: -1,
+            text: debouncedValue,
+            topics: selectedTopic,
+            level: selectedLevel,
+            component: selectedComponent,
+            minMarks: -1,
+            maxMarks: 100,
+            paperYear: "",
+            searchInMarkscheme: false,
+            };
+    }
 
-
-    console.log("query 100 !!! ", query);
     const url = qs.stringifyUrl({
       url: "/questionbank",
       query,
     });
 
     router.push(url);
-  }, [debouncedValue, router]);
+  }, [debouncedValue, router, selectedTopic, selectedLevel, selectedComponent]);
 
-  const levels = ["A, AS"];
-  const components: string[] = [];
-  if (selectedLevel === "AS")
-  {
-    components.push("component 1");
-  }
-  else
-  {
-    components.push("component 1");
-    components.push("component 2");
-  }
+
+
 
   return (
     <div className="search">
@@ -77,6 +81,7 @@ const SearchComponentCollection: React.FC<SearchComponentCollectionProps> = ({
         selectedComponent={selectedComponent}
         selectComponent={setSelectedComponent}
         components={components}
+        selectedLevel = {selectedLevel}
       />
     </div>
   );

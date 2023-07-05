@@ -4,6 +4,7 @@ import { SearchCriteria } from '@/types';
 
 const searchQuestions = async (searchCriteria: SearchCriteria): Promise<Question[]> => {
     // if search criteria has nothing in it
+    console.log("por", searchCriteria);
     if (Object.keys(searchCriteria).length === 0)
     {
         // make an empty search criteria

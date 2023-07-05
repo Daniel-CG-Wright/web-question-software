@@ -52,10 +52,12 @@ function sanitize(str: string): string {
  * @returns {Promise<Question[]>} - The promise resolves to the result of the query
  */
 function dbGetQuestions(criteria: SearchCriteria): Promise<Question[]> {
-  console.log("criteria: ", criteria);
   let { text, topics, component, level, minMarks, maxMarks, id, searchInMarkscheme, paperYear } = criteria;
+  // log all the search criteria
+
+
   // if topics is a string, convert to an array with one element
-  if (typeof topics === 'string') topics = [topics];
+  if (typeof topics === 'string' && topics != "") topics = [topics];
 
   // create the query based on search criteria
   let query = `
@@ -94,7 +96,7 @@ function dbGetQuestions(criteria: SearchCriteria): Promise<Question[]> {
 
   if (topics && topics.length > 0) {
     // add each topic to the conditions array
-    let topicQueries = topics.map((topic: string) => `QuestionTopic.TopicID = ${topic}`);
+    let topicQueries = topics.map((topic: string) => `QuestionTopic.TopicID = '${topic}'`);
     // join the topic queries with OR
     conditions.push(`(${topicQueries.join(' OR ')})`);
   }
@@ -129,8 +131,8 @@ function dbGetQuestions(criteria: SearchCriteria): Promise<Question[]> {
     conditions.push(`Question.QuestionID = ${id}`);
   }
 
-  if (searchInMarkscheme) {
-    conditions.push(`Question.Markscheme = '${text}'`);
+  if (searchInMarkscheme === true) {
+    conditions.push(`Question.MarkschemeContents LIKE '%${text}%'`);
   }
 
   if (paperYear) {
@@ -154,7 +156,7 @@ function dbGetQuestions(criteria: SearchCriteria): Promise<Question[]> {
         Question.QuestionID ASC;
     `;
 
-  console.log(query);
+   // console.log(query);
   return new Promise((resolve, reject) => {
     selectQuery(query, [])
       .then((results) => {
