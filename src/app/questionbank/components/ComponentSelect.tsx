@@ -8,6 +8,9 @@ interface ComponentSelectProps {
   selectedLevel: string;
 }
 
+/**
+ * ComponentSelect is a dropdown menu that allows the user to select a component.
+ */
 const ComponentSelect: React.FC<ComponentSelectProps> = ({
   components,
   selectedComponent,
@@ -18,16 +21,17 @@ const ComponentSelect: React.FC<ComponentSelectProps> = ({
     selectComponent(event.target.value);
   };
 
+  // if the user selects AS, then disable the component select as there is only one component.
   if (selectedLevel.toLowerCase() === "as")
   {
     return (
-      <select className="select" value={"component 1"} onChange={handleChange} disabled>
+      <select className="dropdown" value={"component 1"} onChange={handleChange} disabled>
         <option value="component 1">Component 1</option>
       </select>
     );
   }
   return (
-    <select className="select" value={selectedComponent} onChange={handleChange}>
+    <select className="dropdown" value={selectedComponent} onChange={handleChange}>
       <option value="">All components</option>
       {components.map((component) => (
         <option key={component} value={component}>

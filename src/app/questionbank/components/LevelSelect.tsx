@@ -13,8 +13,8 @@ const LevelSelect: React.FC<LevelSelectProps> = ({ selectedLevel, setSelectedLev
   };
 
   return (
-    <div className="search">
-      <select value={selectedLevel} onChange={handleLevelChange}>
+    <div>
+      <select className = "dropdown" value={selectedLevel} onChange={handleLevelChange}>
         <option value="">All levels</option>
         {levels.map((level, index) => (
           <option value={level.toLowerCase()} key={index}>

@@ -14,7 +14,7 @@ const TopicsCombobox: React.FC<TopicsComboboxProps> = ({ selectedTopic, setSelec
 
   return (
     <div className="search">
-      <select value={selectedTopic} onChange={handleTopicChange}>
+      <select className="dropdown" value={selectedTopic} onChange={handleTopicChange}>
         <option value="">All topics</option>
         {topics.map(topic => (
           <option value={topic} key={topic}>

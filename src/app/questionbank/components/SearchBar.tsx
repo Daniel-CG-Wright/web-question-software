@@ -13,7 +13,9 @@ const SearchInput: React.FC<SearchInputProps> = ({ value, setValue }) => {
 
   return (
     <div className="search">
-      <input type="text" placeholder="Search..." value={value} onChange={handleInputChange} />
+      <input type="text" placeholder="Search..." value={value} onChange={handleInputChange}
+      className='bg-transparent border-2 border-white text-white w-64 px-4 py-2 rounded-md
+      '/>
     </div>
   );
 };

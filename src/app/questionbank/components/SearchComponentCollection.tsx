@@ -62,7 +62,17 @@ const SearchComponentCollection: React.FC<SearchComponentCollectionProps> = ({
 
 
   return (
-    <div className="search">
+    <div className="
+    flex
+    flex-col
+    md:flex-row
+    md:justify-between
+    md:items-center
+    md:space-x-4
+    space-y-4
+    md:space-y-0
+    m-4
+    ">
       <SearchInput
         value={value}
         setValue={setValue}

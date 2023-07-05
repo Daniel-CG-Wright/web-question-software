@@ -7,10 +7,56 @@ body,
 :root {
   height: 100%;
   width: 100%;
-  background-color: black;
+  background-color: #525252;
   color-scheme: dark;
 }
 
 .layoutlink {
   @apply text-white no-underline p-4;
 }
+
+/* Dropdowns should have a white background and black text,
+and should be rounded on the top left and top right corners.
+Also disable the dropdown arrow from highlighting when hovered by doing pointer-events-none */
+.dropdown {
+  @apply 
+    bg-white 
+    text-black 
+    rounded
+    appearance-none
+    px-2;
+  }
+.dropdown:focus {
+  @apply 
+    bg-gray-200 
+    text-black 
+    rounded-tl-lg 
+    rounded-tr-lg
+  }
+
+
+  @layer utilities {
+    /* custom scrollbar */
+    .scrollbar::-webkit-scrollbar {
+      width: 20px;
+      height: 20px;
+    }
+  
+    .scrollbar::-webkit-scrollbar-track {
+      border-top-right-radius: 12px;
+      border-bottom-right-radius: 12px;
+      background: #f7f4ed;
+      overflow: hidden;
+    }
+
+    .scrollbar::-webkit-scrollbar-thumb {
+      background: #888888;
+      border-radius: 15px;
+      border: 3px solid #f6f7ed;
+    }
+  
+    .scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #333333;
+    }
+  
+  }
