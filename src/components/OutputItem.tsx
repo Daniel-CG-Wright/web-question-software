@@ -34,7 +34,11 @@ interface OutputViewProps {
  */
 export default function OutputView({ items, isImage }: OutputViewProps): JSX.Element {
   return (
-    <div className="">
+    <div className="
+    flex
+    flex-col
+    overflow-y-auto
+    ">
       {items.map((item, index) => (
         <OutputItem key={index} isImage={isImage} text={item} />
       ))}
