@@ -1,35 +1,59 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Ignore Node.js dependencies
+node_modules/
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
+# Ignore Next.js build output
+.next/
 
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
+# Ignore development server logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# local env files
-.env*.local
+# Ignore macOS specific files
+.DS_Store
 
-# vercel
-.vercel
+# Ignore JetBrains IDE files
+.idea/
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# Ignore Visual Studio Code specific files
+.vscode/
+
+# Ignore Git LFS files
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
+*.webp
+*.woff
+*.woff2
+*.ttf
+*.otf
+*.eot
+*.pdf
+
+# Ignore LFS tracking files by extension
+*.mp4
+*.mov
+*.avi
+*.flv
+*.webm
+*.mp3
+*.wav
+*.aac
+*.flac
+
+# Ignore LFS tracking files by wildcard
+*.zip
+*.rar
+*.tar
+*.gz
+*.7z
+*.pdf
+*.doc
+*.docx
+*.xls
+*.xlsx
+*.ppt
+*.pptx
