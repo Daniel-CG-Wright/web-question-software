@@ -26,7 +26,8 @@ function OutputItem({ isImage, text }: OutputItemProps): JSX.Element {
   }
   return (
     <div style={{width: '100%', height: '400px', position: 'relative'}}>
-      {isImage ? <ImageComponent src={text} alt="Output Item" fill style={{objectFit: 'contain'}}/> : <p className="whitespace-pre-wrap">{text}</p>}
+      {isImage ? <ImageComponent src={text} alt="Output Item" fill style={{objectFit: 'contain'}}/> : <p className="whitespace-pre-wrap">{text}</p>
+}
     </div>
   );
 }

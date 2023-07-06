@@ -1,6 +1,5 @@
 "use client"
-import SliderToggle from "@/components/SliderInput";
-import exp from "constants";
+import StandardToggles from "@/components/StandardToggles";
 
 interface QuestionHeaderProps {
     selectedQuestionCode: string;
@@ -22,17 +21,11 @@ const QuestionHeader: React.FC<QuestionHeaderProps> = ({
         <div className="flex justify-between items-center">
             <div className="flex items-center">
                 <h1 className="text-2xl font-bold text-white">Question {selectedQuestionCode}</h1>
-                <SliderToggle
-                    left="Display as images"
-                    right="Display as text"
-                    checkedValue={displayAsImages}
-                    onChange={setDisplayAsImages}
-                />
-                <SliderToggle
-                    left="Display question"
-                    right="Display markscheme"
-                    checkedValue={displayMarkscheme}
-                    onChange={setDisplayMarkscheme}
+                <StandardToggles
+                    displayMarkscheme={displayMarkscheme}
+                    setDisplayMarkscheme={setDisplayMarkscheme}
+                    displayAsImages={displayAsImages}
+                    setDisplayAsImages={setDisplayAsImages}
                 />
             </div>
         </div>

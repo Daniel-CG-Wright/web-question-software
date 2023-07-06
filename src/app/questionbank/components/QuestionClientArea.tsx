@@ -1,6 +1,6 @@
 "use client"
 import QuestionHeader from "./QuestionHeader";
-import SearchComponentCollection from "./SearchComponentCollection";
+import SearchComponentCollection from "@/components/SearchComponentCollection";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import qs from "query-string";
