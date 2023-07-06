@@ -7,7 +7,8 @@ export interface SearchCriteria {
     minMarks: number,
     maxMarks: number,
     paperYear: string,
-    searchInMarkscheme: boolean
+    searchInMarkscheme: boolean,
+    selectedID: number,
 }
 
 export interface Question {
@@ -18,4 +19,20 @@ export interface Question {
     paperCode: string,
     marks: number,
     markscheme: string,
+}
+
+export interface Image {
+    id: number,
+    isMS: number,
+}
+
+export interface Text {
+    questionContents: string,
+    markschemeContents: string,
+}
+
+
+export interface OutputData {
+    images: Image[],
+    text: Text,
 }

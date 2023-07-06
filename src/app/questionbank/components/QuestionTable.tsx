@@ -3,6 +3,7 @@ import { Question } from "@/types";
 
 interface QuestionTableProps {
     questions: Question[];
+    onClickRow?: (id: number) => void;
 }
 
 interface QuestionTableRowProps {
@@ -66,7 +67,7 @@ const ClickableQuestionTableRow: React.FC<QuestionTableRowProps> = ({
  * @param {Object} props - The props object, containing the questions.
  * @returns {HTML} HTML section containing a question table.
  * */
-const QuestionTable: React.FC<QuestionTableProps> = ({ questions }) => {
+const QuestionTable: React.FC<QuestionTableProps> = ({ questions, onClickRow }) => {
     if (questions.length === 0) {
         return (
             <div className="text-center text-lg font-bold">
@@ -95,7 +96,7 @@ const QuestionTable: React.FC<QuestionTableProps> = ({ questions }) => {
             border-[#8b8b8b]
         ">
                 {questions.map((question) => (
-                    <ClickableQuestionTableRow key={question.id} question={question} />
+                    <ClickableQuestionTableRow key={question.id} question={question} onClick={onClickRow} />
                 ))}
             </tbody>
         </table>

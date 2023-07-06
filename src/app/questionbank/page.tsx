@@ -1,24 +1,12 @@
 import QuestionOutputArea from "./components/QuestionClientArea";
-import QuestionTable from "./components/QuestionTable";
 import searchQuestions from "@/actions/searchQuestions";
+import getOutputData from "@/actions/getOutputData";
 import getTopics from "@/actions/getTopics";
 
-import { SearchCriteria } from "@/types";
+import { OutputData, SearchCriteria } from "@/types";
 
 interface SearchProps {
-    searchParams: {
-        id: number;
-        text: string;
-        topics: string[];
-        level: string;
-        component: string;
-        minMarks: number;
-        maxMarks: number;
-        paperYear: string;
-        searchInMarkscheme: boolean;
-        displayAsImages: boolean;
-        displayMarkscheme: boolean;
-    }
+    searchParams: SearchCriteria;
 };
 
 const Search: React.FC<SearchProps> = async ({ searchParams }) => {
@@ -26,12 +14,36 @@ const Search: React.FC<SearchProps> = async ({ searchParams }) => {
     const questions = await searchQuestions(searchParams);
     const topics = await getTopics();
 
+    // we return all the image and text data for question and markscheme
+    // so that we can display them in the question client area
+    // and we do not need server traffic whenever we switch between question and markscheme
+    // or when we switch between image and text
+    let outputData: OutputData;
+    console.log("searchParams.id: ", searchParams.selectedID)
+    if (searchParams.selectedID && searchParams.selectedID >= 0) {
+        console.log("existent question")
+        outputData = await getOutputData(
+                searchParams.selectedID
+        )
+    }
+    else {
+        console.log("non-existent question")
+        outputData = {
+            images: [],
+            text: {
+                questionContents: "",
+                markschemeContents: "",
+            },
+        };
+    }
+
     return (
         <>
             <QuestionOutputArea
                 selectedQuestionCode={-1}
                 topics={topics}
-                questionTable={<QuestionTable questions={questions} />}
+                questions={questions}
+                outputData={outputData}
             />
         </>
     );

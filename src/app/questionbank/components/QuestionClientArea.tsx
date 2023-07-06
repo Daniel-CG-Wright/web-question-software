@@ -5,17 +5,24 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import qs from "query-string";
 import useDebounce from "@/hooks/useDebounce";
+import {OutputData, Question} from "@/types";
+import QuestionTable from "./QuestionTable";
+import OutputView from "@/components/OutputItem";
+
+// base client area with all interactables.
 
 interface QuestionOutputAreaProps {
     selectedQuestionCode: string;
     topics: string[];
-    questionTable: React.ReactNode;
+    questions: Question[];
+    outputData: OutputData;
 }
 
 const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
     selectedQuestionCode,
     topics,
-    questionTable,
+    questions,
+    outputData
 }) => {
     const [displayAsImages, setDisplayAsImages] = useState(true);
     const [displayMarkscheme, setDisplayMarkscheme] = useState(false);
@@ -24,6 +31,7 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
     const [selectedTopic, setSelectedTopic] = useState("");
     const [selectedLevel, setSelectedLevel] = useState("");
     const [selectedComponent, setSelectedComponent] = useState("");
+    const [selectedID, setSelectedID] = useState(-1);
     const debouncedValue = useDebounce(value, 500);
 
     let levels = ["A", "AS"];
@@ -36,8 +44,7 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
             selectedTopic === "" &&
             selectedLevel === "" &&
             selectedComponent === "" &&
-            displayAsImages === true &&
-            displayMarkscheme === false
+            selectedID < 0
         ) {
             query = {};
         }
@@ -53,8 +60,7 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
                 maxMarks: 100,
                 paperYear: "",
                 searchInMarkscheme: false,
-                displayAsImages: displayAsImages,
-                displayMarkscheme: displayMarkscheme,
+                selectedID: selectedID,
                 };
         }
 
@@ -64,10 +70,11 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
         });
 
         router.push(url);
-    }, [debouncedValue, router, selectedTopic, selectedLevel, selectedComponent]);
-        
+    }, [debouncedValue, router, selectedTopic, selectedLevel, selectedComponent,
+        selectedID]);
+    
     return (
-        <div className="flex flex-col h-full">
+        <div className="h-full">
             <SearchComponentCollection
                 topics={topics}
                 selectedTopic={selectedTopic}
@@ -81,13 +88,24 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
                 levels={levels}
                 components={components}
             />
-            {questionTable}
+            <QuestionTable
+                questions={questions}
+                onClickRow={(id) => {
+                    setSelectedID(id);
+                }
+                }
+                />
             <QuestionHeader
                 selectedQuestionCode={selectedQuestionCode}
                 displayAsImages={displayAsImages}
                 setDisplayAsImages={setDisplayAsImages}
                 displayMarkscheme={displayMarkscheme}
                 setDisplayMarkscheme={setDisplayMarkscheme}
+            />
+            <OutputView
+                outputData={outputData}
+                isImage={displayAsImages}
+                displayMarkscheme={displayMarkscheme}
             />
         </div>
     );

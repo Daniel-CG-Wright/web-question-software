@@ -1,7 +1,6 @@
 import mysql from 'mysql';
 import { SearchCriteria, Question } from '@/types';
-import { Search } from 'aws-sdk/clients/kendra';
-
+import { Image, Text } from '@/types';
 // Create a connection to the database
 const connection = mysql.createConnection({
   host: 'localhost',
@@ -10,16 +9,6 @@ const connection = mysql.createConnection({
   database: 'ExamQuestions',
   port: 3306,
 });
-
-interface Image {
-  id: number;
-  isMS: boolean;
-}
-
-interface Text {
-  questionText: string;
-  markschemeText: string;
-}
 
 /**
  * This function is used to perform a parameterized query to get data
@@ -248,7 +237,7 @@ function dbGetText(questionID: number): Promise<Text> {
   let query = `
     SELECT
         QuestionContents AS questionText,
-        Markscheme AS markschemeText
+        MarkschemeContents AS markschemeText
     FROM
         Question
     WHERE
@@ -258,8 +247,8 @@ function dbGetText(questionID: number): Promise<Text> {
   return selectQuery(query, [questionID])
     .then((results) => {
       let text: Text = {
-        questionText: results[0].questionText,
-        markschemeText: results[0].markschemeText,
+        questionContents: results[0].questionText,
+        markschemeContents: results[0].markschemeText,
       };
       return text;
     });

@@ -17,7 +17,8 @@ const searchQuestions = async (searchCriteria: SearchCriteria): Promise<Question
             minMarks: 0,
             maxMarks: 20,
             paperYear: "",
-            searchInMarkscheme: false
+            searchInMarkscheme: false,
+            selectedID: -1,
     };
     }
     let questions = await dbGetQuestions(searchCriteria);

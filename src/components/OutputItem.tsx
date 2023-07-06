@@ -1,4 +1,7 @@
 import React from 'react';
+import { OutputData } from '@/types';
+import { Image, Text } from '@/types';
+import ImageComponent from 'next/image';
 
 interface OutputItemProps {
   isImage: boolean;
@@ -13,35 +16,62 @@ interface OutputItemProps {
  * @returns {JSX.Element} - the item
  */
 function OutputItem({ isImage, text }: OutputItemProps): JSX.Element {
+  console.log("OutputItem: ", text);
+  if ( isImage )
+  {
+    // convert image file to path from public folder
+    text = `/questionImages/${text}.png`
+    console.log("OutputItem: ", text);
+
+  }
   return (
-    <div className="">
-      {isImage ? <img src={text} alt="Output Item" /> : text}
+    <div style={{width: '100%', height: '400px', position: 'relative'}}>
+      {isImage ? <ImageComponent src={text} alt="Output Item" fill style={{objectFit: 'contain'}}/> : <p className="whitespace-pre-wrap">{text}</p>}
     </div>
   );
 }
 
 interface OutputViewProps {
-  items: string[];
+  outputData: OutputData;
   isImage: boolean;
+  displayMarkscheme: boolean;
 }
 
 /**
  * The output view - a scroll area which can show a list of text or image items
  * @param {Object} data - the data
- * @param {string[]} data.items - the list of text or image paths
+ * @param {OutputData} data.outputData - the outputData
  * @param {boolean} data.isImage - true if the items are images
+ * @param {boolean} data.displayMarkscheme - true if the MS should be displayed
  * @returns {JSX.Element} - the output view
  */
-export default function OutputView({ items, isImage }: OutputViewProps): JSX.Element {
+export default function OutputView({ outputData, isImage, displayMarkscheme }: OutputViewProps): JSX.Element {
+  console.log("outputData: ", outputData)
+  let outputComponents: (string)[] = [];
+ if (!isImage && !displayMarkscheme) {
+    outputComponents.push(outputData.text.questionContents);
+  } else if (!isImage && displayMarkscheme) {
+    outputComponents.push(outputData.text.markschemeContents);
+  } else if (isImage) {
+    // outputComponents is all the images which have isMS = displayMarkscheme
+    for (let i = 0; i < outputData.images.length; i++) {
+      if (!!outputData.images[i].isMS === displayMarkscheme) {
+        outputComponents.push(outputData.images[i].id.toString());
+      }
+    }
+  }
+  console.log("outputComponents: ", outputComponents)
   return (
-    <div className="
-    flex
-    flex-col
-    overflow-y-auto
+    
+    <div className="flex flex-col
+    w-full
     ">
-      {items.map((item, index) => (
-        <OutputItem key={index} isImage={isImage} text={item} />
-      ))}
+      {
+        // for each item in outputComponents, create an OutputItem
+        outputComponents.map((item, index) => (
+          <OutputItem key={index} isImage={isImage} text={item} />
+        ))
+      }
     </div>
   );
 }

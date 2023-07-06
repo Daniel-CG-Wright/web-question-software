@@ -17,6 +17,7 @@ const QuestionHeader: React.FC<QuestionHeaderProps> = ({
     displayMarkscheme,
     setDisplayMarkscheme,
 }) => {
+    
     return (
         <div className="flex justify-between items-center">
             <div className="flex items-center">
