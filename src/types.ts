@@ -49,4 +49,10 @@ export interface OutputData {
     images: Image[],
     questionNumber: number,
     text: Text,
+    totalMarks: number,
+}
+
+export interface RQGQuestionData {
+    questionID: number,
+    questionMarks: number,
 }

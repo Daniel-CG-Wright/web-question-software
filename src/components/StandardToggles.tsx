@@ -17,7 +17,7 @@ const StandardToggles: React.FC<StandardTogglesProps> = ({
     setDisplayAsImages,
 }) => {
     return (
-        <div className="flex flex-col md:flex-row md:space-x-4">
+        <div className="flex flex-col md:flex-row">
             <SliderToggle
                 left="Display question"
                 right="Display markscheme"

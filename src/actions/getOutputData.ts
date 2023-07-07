@@ -1,4 +1,4 @@
-import { dbGetText, dbGetImages } from '@/server-util/db';
+import { dbGetOutputData } from '@/server-util/db';
 import { ServerResponseOutputData } from '@/types';
 
 /**
@@ -19,19 +19,12 @@ const getOutputData = async (
             errorOutput: "Invalid question ID",
         };
     }
-    let text = await dbGetText(id);
-    let images = await dbGetImages(id);
-    console.log(images)
-    // return the output data
+    const outputData = await dbGetOutputData(id);
+    console.log(outputData)
     return {
-        outputData: {
-            
-            text: text,
-            images: images,
-        },
+        outputData,
         errorOutput: null,
     };
-
 }
 
 export default getOutputData;
