@@ -21,6 +21,13 @@ export interface Question {
     markscheme: string,
 }
 
+// Data for a specific paper
+export interface PaperData {
+    year: string,
+    component: string,
+    level: string,
+    subject: string,
+}
 export interface Image {
     id: number,
     isMS: number,
@@ -31,8 +38,15 @@ export interface Text {
     markschemeContents: string,
 }
 
+// Interface used for actions outputting server responses
+export interface ServerResponseOutputData {
+    outputData: OutputData | null,
+    errorOutput: string | null,
+}
 
 export interface OutputData {
+    paperData: PaperData,
     images: Image[],
+    questionNumber: number,
     text: Text,
 }

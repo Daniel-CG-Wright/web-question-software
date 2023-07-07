@@ -19,15 +19,13 @@ const Search: React.FC<SearchProps> = async ({ searchParams }) => {
     // and we do not need server traffic whenever we switch between question and markscheme
     // or when we switch between image and text
     let outputData: OutputData;
-    console.log("searchParams.id: ", searchParams.selectedID)
+    // get the output data for the selected question
     if (searchParams.selectedID && searchParams.selectedID >= 0) {
-        console.log("existent question")
         outputData = await getOutputData(
                 searchParams.selectedID
         )
     }
     else {
-        console.log("non-existent question")
         outputData = {
             images: [],
             text: {

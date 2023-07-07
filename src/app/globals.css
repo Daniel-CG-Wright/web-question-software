@@ -36,7 +36,7 @@ Also disable the dropdown arrow from highlighting when hovered by doing pointer-
 
 
   @layer utilities {
-    /* custom scrollbar */
+    /* custom scrollbar, make sure it does not clip out its track */
     .scrollbar::-webkit-scrollbar {
       width: 20px;
       height: 20px;
@@ -61,6 +61,7 @@ Also disable the dropdown arrow from highlighting when hovered by doing pointer-
   
   }
 
+  /* For the slider-style toggle switches that function like fancy checkboxes */
   .toggle-switch-handle {
     background-color: white;
   }

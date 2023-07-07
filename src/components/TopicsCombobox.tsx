@@ -43,7 +43,6 @@ const TopicsCombobox: React.FC<TopicsComboboxProps> = ({ selectedTopics, setSele
     return (
       <div className="flex flex-col space-y-2">
         <div className="flex flex-row items-center space-x-2">
-          <label htmlFor="topics">Topics</label>
           <input
             type="checkbox"
             id="allTopics"
@@ -62,7 +61,8 @@ const TopicsCombobox: React.FC<TopicsComboboxProps> = ({ selectedTopics, setSele
               'opacity-0': allTopicsSelected,
               'opacity-100': !allTopicsSelected,
               'pointer-events-none': allTopicsSelected,
-            }
+            },
+            'scrollbar'
           )
         } id="topics" name="topics" size={10} onChange={handleTopicChange}>
           {topics.map((topic) => (

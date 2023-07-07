@@ -1,6 +1,6 @@
 import mysql from 'mysql';
 import { SearchCriteria, Question } from '@/types';
-import { Image, Text } from '@/types';
+import { Image, Text, PaperData } from '@/types';
 // Create a connection to the database
 const connection = mysql.createConnection({
   host: 'localhost',
@@ -254,4 +254,40 @@ function dbGetText(questionID: number): Promise<Text> {
     });
 }
 
-export { dbGetQuestions, dbGetTopics, dbGetImages, dbGetText };
+/**
+ * Get the paper data for a given question ID (the paper's year, component, level and subject)
+ * @param {number} questionID - the question ID to get the paper data for
+ * @returns {Promise<PaperData>} - a promise for the results of the query - a structure containing the paper's year, component, level and subject
+ */
+function dbGetPaperData(questionID: number): Promise<PaperData> {
+  let query = `
+    SELECT
+        Paper.PaperYear AS paperYear,
+        Paper.PaperComponent AS paperComponent,
+        Paper.PaperLevel AS paperLevel,
+        Paper.PaperSubject AS paperSubject
+    FROM
+        Paper
+    INNER JOIN
+        Question
+    ON
+        Paper.PaperCode = Question.PaperCode
+    WHERE
+        Question.QuestionID = ?;
+    `;
+
+  return selectQuery(query, [questionID])
+    .then((results) => {
+      let paperData: PaperData = {
+        year: results[0].paperYear,
+        component: results[0].paperComponent,
+        level: results[0].paperLevel,
+        subject: results[0].paperSubject,
+      };
+      return paperData;
+    });
+}
+
+
+
+export { dbGetQuestions, dbGetTopics, dbGetImages, dbGetText, dbGetPaperData };
