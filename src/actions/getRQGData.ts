@@ -1,6 +1,6 @@
 // get the data for the random question generator
 import { dbGetQuestions } from '@/server-util/db';
-import { RQGQuestionData, SearchCriteria } from '@/types';
+import { SearchCriteria, RQGQuestionData } from '@/types';
 /**
  * Takes in search criteria and returns a promise for the results of the query, to be used in the question pool for the random question generator
  * @param {SearchCriteria} searchCriteria - the search criteria to use

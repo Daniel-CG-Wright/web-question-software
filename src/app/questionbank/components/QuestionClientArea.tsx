@@ -12,14 +12,12 @@ import OutputView from "@/components/OutputItem";
 // base client area with all interactables.
 
 interface QuestionOutputAreaProps {
-    selectedQuestionCode: string;
     topics: string[];
     questions: Question[];
     outputData: OutputData;
 }
 
 const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
-    selectedQuestionCode,
     topics,
     questions,
     outputData
@@ -34,6 +32,7 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
     const [selectedID, setSelectedID] = useState(-1);
     const debouncedValue = useDebounce(value, 500);
 
+    // TODO may need to make these changeable by making them props, for different subjects
     let levels = ["A", "AS"];
     let components = ["Component 1", "Component 2"];
     useEffect(() => {
@@ -96,7 +95,7 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
                 }
                 />
             <QuestionHeader
-                selectedQuestionCode={selectedQuestionCode}
+                outputData={outputData}
                 displayAsImages={displayAsImages}
                 setDisplayAsImages={setDisplayAsImages}
                 displayMarkscheme={displayMarkscheme}
