@@ -8,8 +8,8 @@ import ComponentSelect from "./ComponentSelect";
 
 interface SearchComponentCollectionProps {
   topics: string[];
-    selectedTopics: string;
-    setSelectedTopics: (topic: string) => void;
+    selectedTopics: string[];
+    setSelectedTopics: (topics: string[]) => void;
     value: string;
     setValue: (value: string) => void;
     selectedLevel: string;
@@ -53,8 +53,8 @@ const SearchComponentCollection: React.FC<SearchComponentCollectionProps> = ({
         setValue={setValue}
       />}
       <TopicsCombobox
-        selectedTopic={selectedTopics}
-        setSelectedTopic={setSelectedTopics}
+        selectedTopics={selectedTopics}
+        setSelectedTopics={setSelectedTopics}
         topics={topics}
       />
       <LevelSelect

@@ -28,7 +28,7 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
     const [displayMarkscheme, setDisplayMarkscheme] = useState(false);
     const router = useRouter();
     const [value, setValue] = useState("");
-    const [selectedTopic, setSelectedTopic] = useState("");
+    const [selectedTopics, setSelectedTopics] = useState(topics);
     const [selectedLevel, setSelectedLevel] = useState("");
     const [selectedComponent, setSelectedComponent] = useState("");
     const [selectedID, setSelectedID] = useState(-1);
@@ -41,7 +41,7 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
         let query = {};
         if (
             debouncedValue === "" &&
-            selectedTopic === "" &&
+            selectedTopics == topics &&
             selectedLevel === "" &&
             selectedComponent === "" &&
             selectedID < 0
@@ -53,7 +53,7 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
             query = {
                 id: -1,
                 text: debouncedValue,
-                topics: selectedTopic,
+                topics: selectedTopics,
                 level: selectedLevel,
                 component: selectedComponent,
                 minMarks: -1,
@@ -70,15 +70,15 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
         });
 
         router.push(url);
-    }, [debouncedValue, router, selectedTopic, selectedLevel, selectedComponent,
+    }, [debouncedValue, router, selectedTopics, selectedLevel, selectedComponent,
         selectedID]);
     
     return (
         <div className="h-full">
             <SearchComponentCollection
                 topics={topics}
-                selectedTopic={selectedTopic}
-                setSelectedTopic={setSelectedTopic}
+                selectedTopics={selectedTopics}
+                setSelectedTopics={setSelectedTopics}
                 value={value}
                 setValue={setValue}
                 selectedLevel={selectedLevel}
