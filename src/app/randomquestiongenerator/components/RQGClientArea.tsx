@@ -5,10 +5,14 @@ import RQGControlButtons from "./RQGControlButtons";
 import RQGInfo from "./RQGinfoComponent";
 import OutputView from "@/components/OutputItem";
 import StandardToggles from "@/components/StandardToggles";
-import { Question } from "@/types";
+import { OutputData, RQGQuestionData } from "@/types";
+import { useRouter } from "next/router";
+import { useDebounce } from "@/hooks/useDebounce";
+import getRQGData from "@/actions/getRQGData";
 
 interface RandomQuestionGeneratorProps {
-    questionPool: Question[];
+    // array of question IDs
+    questionPool: RQGQuestionData[];
     topics: string[];
     levels: string[];
     components: string[];
@@ -27,11 +31,29 @@ const RandomQuestionGenerator: React.FC<RandomQuestionGeneratorProps> = ({
     const [selectedMaxMarks, setSelectedMaxMarks] = useState<number>(20);
     const [displayAsImages, setDisplayAsImages] = useState<boolean>(true);
     const [displayMarkscheme, setDisplayMarkscheme] = useState<boolean>(false);
-    const [outputData, setOutputData] = useState<Question[]>([]);
     const [numQuestions, setNumQuestions] = useState<number>(0);
-    const [totalMarks, setTotalMarks] = useState<number>(0);
+    const [currentQuestion, setCurrentQuestion] = useState<number>(0);
 
+    const totalMarks = questionPool.reduce((acc, curr) => acc + curr.questionMarks, 0);
 
+    const onClickGenerate = () => {
+        // call a server action to get a new question pool
+        searchParams = 
+    }
+
+    const onClickNext = () => {
+        if (currentQuestion < numQuestions - 1) {
+            setCurrentQuestion(currentQuestion + 1);
+        }
+    };
+
+    const onClickPrevious = () => {
+        if (currentQuestion > 0) {
+            setCurrentQuestion(currentQuestion - 1);
+        }
+    };
+
+    // get the output data from the
     return (
         <div className="flex flex-col space-y-4">
             <SearchComponentCollection
@@ -49,6 +71,7 @@ const RandomQuestionGenerator: React.FC<RandomQuestionGeneratorProps> = ({
                 includeSearchBar={false}
             />
             <RQGControlButtons
+                onClickGenerate={onClickGenerate}
                 onClickNext={onClickNext}
                 onClickPrevious={onClickPrevious}
             />
@@ -64,9 +87,9 @@ const RandomQuestionGenerator: React.FC<RandomQuestionGeneratorProps> = ({
             />
             <OutputView
                 outputData={outputData}
-                displayAsImages={displayAsImages}
+                isImage={displayAsImages}
                 displayMarkscheme={displayMarkscheme}
             />
         </div>
-    )
-    )
+    );
+}

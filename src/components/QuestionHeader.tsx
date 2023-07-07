@@ -18,16 +18,16 @@ const QuestionHeader: React.FC<QuestionHeaderProps> = ({
 }) => {
     
     return (
-        <div className="flex justify-between items-center">
-            <div className="flex items-center">
-                <h1 className="text-2xl font-bold text-white">Question {selectedQuestionCode}</h1>
-                <StandardToggles
-                    displayMarkscheme={displayMarkscheme}
-                    setDisplayMarkscheme={setDisplayMarkscheme}
-                    displayAsImages={displayAsImages}
-                    setDisplayAsImages={setDisplayAsImages}
-                />
-            </div>
+        <div className="flex flex-row justify-between items-center w-full place-content-center mx-0">
+            
+            <h1 className="sm:text-xl text-lg text-white">{selectedQuestionCode}</h1>
+
+            <StandardToggles
+                displayMarkscheme={displayMarkscheme}
+                setDisplayMarkscheme={setDisplayMarkscheme}
+                displayAsImages={displayAsImages}
+                setDisplayAsImages={setDisplayAsImages}
+            />
         </div>
     );
 }

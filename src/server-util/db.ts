@@ -1,6 +1,6 @@
 import mysql from 'mysql';
 import { SearchCriteria, Question } from '@/types';
-import { Image, Text, PaperData } from '@/types';
+import { Image, Text, PaperData, OutputData, RQGQuestionData } from '@/types';
 // Create a connection to the database
 const connection = mysql.createConnection({
   host: 'localhost',
@@ -195,99 +195,68 @@ function dbGetTopics(): Promise<string[]> {
 }
 
 /**
- * This gets the array of images for a questionID.
- * @param {number} questionID - the questionID to get the images for
- * @returns {Promise<Image[]>} - a promise for the results of the query - a structure containing the imageID and whether it is part of the markscheme
+ * This gets all the output data needed for a given questionID.
+ * This includes paperData, text, images and question number.
+ * @param {number} questionID - the questionID to get the data for
+ * @returns {Promise<OutputData>} - a promise for the results of the query - a structure containing the paperData, text, images and question number
  */
-function dbGetImages(questionID: number): Promise<Image[]> {
-  // images are stored as blob data
-  // get all images for a question
+function dbGetOutputData(questionID: number): Promise<OutputData> {
   let query = `
     SELECT
-        Images.ImageID AS ImageID,
-        Images.IsPartOfMarkscheme AS IsPartOfMarkscheme
+        Question.QuestionNumber AS questionNumber,
+        Paper.PaperYear AS paperYear,
+        Paper.PaperComponent AS paperComponent,
+        Paper.PaperLevel AS paperLevel,
+        Paper.PaperSubject AS paperSubject,
+        Question.QuestionContents AS questionText,
+        Question.MarkschemeContents AS markschemeText,
+        Images.ImageID AS imageID,
+        Images.IsPartOfMarkscheme AS isPartOfMarkscheme,
+        Question.TotalMarks AS totalMarks
     FROM
+        Question
+    INNER JOIN
+        Paper
+    ON
+        Question.PaperID = Paper.PaperID
+    LEFT JOIN
         Images
+    ON
+        Question.QuestionID = Images.QuestionID
     WHERE
-        Images.QuestionID = ?
+        Question.QuestionID = ?
     ORDER BY
         Images.ImageNumber ASC;
     `;
 
+    // each row will have the same header data, but will have different image data
+    // this is more 'messy' (data redundancy) but it only uses 1 query as opposed to 2.
   return selectQuery(query, [questionID])
     .then((results) => {
-      let images: Image[] = [];
+      let outputData: OutputData = {
+        questionNumber: results[0].questionNumber,
+        paperData: {
+          year: results[0].paperYear,
+          component: results[0].paperComponent,
+          level: results[0].paperLevel,
+          subject: results[0].paperSubject,
+        },
+        text: {
+          questionContents: results[0].questionText,
+          markschemeContents: results[0].markschemeText,
+        },
+        images: [],
+        totalMarks: results[0].totalMarks
+      };
       results.forEach((row: any) => {
-        images.push({
-          id: row.ImageID,
-          isMS: row.IsPartOfMarkscheme,
+        outputData.images.push({
+          id: row.imageID,
+          isMS: row.isPartOfMarkscheme,
         });
       });
-      return images;
-    });
-}
-
-/**
- * This gets the text for a questionID.
- * @param {number} questionID - the questionID to get the text for
- * @returns {Promise<Text>} - a promise for the results of the query - a structure containing the question text and markscheme text
- */
-function dbGetText(questionID: number): Promise<Text> {
-  // get the question text and markscheme text for a question
-  let query = `
-    SELECT
-        QuestionContents AS questionText,
-        MarkschemeContents AS markschemeText
-    FROM
-        Question
-    WHERE
-        QuestionID = ?;
-    `;
-
-  return selectQuery(query, [questionID])
-    .then((results) => {
-      let text: Text = {
-        questionContents: results[0].questionText,
-        markschemeContents: results[0].markschemeText,
-      };
-      return text;
-    });
-}
-
-/**
- * Get the paper data for a given question ID (the paper's year, component, level and subject)
- * @param {number} questionID - the question ID to get the paper data for
- * @returns {Promise<PaperData>} - a promise for the results of the query - a structure containing the paper's year, component, level and subject
- */
-function dbGetPaperData(questionID: number): Promise<PaperData> {
-  let query = `
-    SELECT
-        Paper.PaperYear AS paperYear,
-        Paper.PaperComponent AS paperComponent,
-        Paper.PaperLevel AS paperLevel,
-        Paper.PaperSubject AS paperSubject
-    FROM
-        Paper
-    INNER JOIN
-        Question
-    ON
-        Paper.PaperCode = Question.PaperCode
-    WHERE
-        Question.QuestionID = ?;
-    `;
-
-  return selectQuery(query, [questionID])
-    .then((results) => {
-      let paperData: PaperData = {
-        year: results[0].paperYear,
-        component: results[0].paperComponent,
-        level: results[0].paperLevel,
-        subject: results[0].paperSubject,
-      };
-      return paperData;
+      return outputData;
     });
 }
 
 
-
-export { dbGetQuestions, dbGetTopics, dbGetImages, dbGetText, dbGetPaperData };
+export { dbGetQuestions, dbGetTopics, dbGetOutputData };

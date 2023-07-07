@@ -5,20 +5,26 @@ import BaseButton from "@/components/BaseButton"
 // including next and previous buttons.
 
 interface RQGControlButtonsProps {
+    onClickGenerate: () => void;
     onClickNext: () => void;
     onClickPrevious: () => void;
 }
 
 /**
- * This class has 2 buttons - previous and next
+ * This class has 3 buttons - generate, previous and next
  */
 const RQGControlButtons: React.FC<RQGControlButtonsProps> = ({
+    onClickGenerate,
     onClickNext,
     onClickPrevious,
 }) => {
 
     return (
         <div className="flex space-x-4">
+            <BaseButton
+                text="Generate new pool"
+                onClick={onClickGenerate}
+            />
             <BaseButton
                 text="Previous"
                 onClick={onClickPrevious}
