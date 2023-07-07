@@ -1,5 +1,5 @@
 import { dbGetText, dbGetImages } from '@/server-util/db';
-import { OutputData } from '@/types';
+import { ServerResponseOutputData } from '@/types';
 
 /**
  * 
@@ -10,16 +10,13 @@ const getOutputData = async (
     
         id: number,
     
-): Promise<OutputData> => {
+): Promise<ServerResponseOutputData> => {
     // get the text and images and return them as output data
     console.log(id)
     if(id < 0) {
         return {
-            images: [],
-            text: {
-                questionContents: '',
-                markschemeContents: '',
-            },
+            outputData: null,
+            errorOutput: "Invalid question ID",
         };
     }
     let text = await dbGetText(id);
@@ -27,8 +24,12 @@ const getOutputData = async (
     console.log(images)
     // return the output data
     return {
-        images: images,
-        text: text,
+        outputData: {
+            
+            text: text,
+            images: images,
+        },
+        errorOutput: null,
     };
 
 }
