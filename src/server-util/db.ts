@@ -41,9 +41,10 @@ function sanitize(str: string): string {
  * @returns {Promise<Question[]>} - The promise resolves to the result of the query
  */
 function dbGetQuestions(criteria: SearchCriteria): Promise<Question[]> {
-  let { text, topics, component, level, minMarks, maxMarks, id, searchInMarkscheme, paperYear } = criteria;
+  let { text, topics, component, level, minMarks, maxMarks, id, searchInMarkscheme, paperYear, subject } = criteria;
   // log all the search criteria
-
+  // if there is no subject, then return an empty array
+  if (!subject) return Promise.resolve([]);
 
   // if topics is a string, convert to an array with one element
   if (typeof topics === 'string' && topics != "") topics = [topics];
@@ -71,7 +72,7 @@ function dbGetQuestions(criteria: SearchCriteria): Promise<Question[]> {
     WHERE
         `;
 
-  let conditions: string[] = [];
+  let conditions: string[] = [`Paper.PaperSubjectID = ${subject}`];
 
   if (text) {
     // escape single quotes in search string
@@ -171,17 +172,17 @@ function dbGetQuestions(criteria: SearchCriteria): Promise<Question[]> {
 
 /**
  * This gets all the topics strings from the database
+ * @param {number} subjectID - the subjectID to get the topics for
  * @returns {Promise<string[]>} - an array of topic strings
  */
-function dbGetTopics(): Promise<string[]> {
+function dbGetTopics(subjectID: number): Promise<string[]> {
   return new Promise((resolve, reject) => {
     let query = `
-        SELECT
-          DISTINCT TopicID
-        FROM
-          QuestionTopic
-        ORDER BY
-          TopicID;
+    SELECT DISTINCT qt.TopicID
+    FROM paper p
+    JOIN question q ON p.PaperID = q.PaperID
+    JOIN questiontopic qt ON q.QuestionID = qt.QuestionID
+    WHERE p.PaperSubjectID = ${subjectID};    
       `;
     selectQuery(query, [])
       .then((results) => {
@@ -207,7 +208,6 @@ function dbGetOutputData(questionID: number): Promise<OutputData> {
         Paper.PaperYear AS paperYear,
         Paper.PaperComponent AS paperComponent,
         Paper.PaperLevel AS paperLevel,
-        Paper.PaperSubject AS paperSubject,
         Question.QuestionContents AS questionText,
         Question.MarkschemeContents AS markschemeText,
         Images.ImageID AS imageID,
@@ -259,4 +259,57 @@ function dbGetOutputData(questionID: number): Promise<OutputData> {
 }
 
 
-export { dbGetQuestions, dbGetTopics, dbGetOutputData };
+/**
+ * This function gets the distinct components for a given subjectID
+ * @param {number} subjectID - the subjectID to get the components for
+ * @returns {Promise<string[]>} - a promise for the results of the query - an array of strings representing the components
+ */
+function dbGetComponents(subjectID: number): Promise<string[]> {
+  let query = `
+    SELECT DISTINCT
+        Paper.PaperComponent
+    FROM
+        Paper
+    WHERE
+        Paper.PaperSubjectID = ?
+    ORDER BY
+        Paper.PaperComponent ASC;
+    `;
+  return selectQuery(query, [subjectID])
+    .then((results) => {
+      let components: string[] = [];
+      results.forEach((row: any) => {
+        components.push(row.PaperComponent);
+      });
+      return components;
+    });
+}
+
+/**
+ * This function gets the distinct levels for a given subjectID
+ * @param {number} subjectID - the subjectID to get the levels for
+ * @returns {Promise<string[]>} - a promise for the results of the query - an array of strings representing the levels
+  */
+function dbGetLevels(subjectID: number): Promise<string[]> {
+  let query = `
+    SELECT DISTINCT
+        Paper.PaperLevel
+    FROM
+        Paper
+    WHERE
+        Paper.PaperSubjectID = ?
+    ORDER BY
+        Paper.PaperLevel ASC;
+    `;
+  return selectQuery(query, [subjectID])
+    .then((results) => {
+      let levels: string[] = [];
+      results.forEach((row: any) => {
+        levels.push(row.PaperLevel);
+      });
+      return levels;
+    });
+}
+
+
+export { dbGetQuestions, dbGetTopics, dbGetOutputData, dbGetComponents, dbGetLevels };

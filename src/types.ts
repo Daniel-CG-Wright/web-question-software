@@ -9,6 +9,7 @@ export interface SearchCriteria {
     maxMarks: number,
     paperYear: string,
     searchInMarkscheme: boolean,
+    subject: number,
 }
 
 // Data for a specific question, used primarily for the question bank table.
@@ -42,12 +43,6 @@ export interface Text {
     markschemeContents: string,
 }
 
-// Interface used for actions outputting server responses
-export interface ServerResponseOutputData {
-    outputData: OutputData | null,
-    errorOutput: string | null,
-}
-
 // This is the type used for exporting questions to a viewable format using OutputView (in OutputItem.tsx)
 export interface OutputData {
     paperData: PaperData,
@@ -62,4 +57,12 @@ export interface OutputData {
 export interface RQGQuestionData {
     questionID: number,
     questionMarks: number,
+}
+
+// Used to store initialisation data for a tool, so that the search criteria inputs
+// have accurate input data to be selected from.
+export interface ToolInitData {
+    topics: string[],
+    components: string[],
+    levels: string[],
 }

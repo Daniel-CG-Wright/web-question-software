@@ -5,32 +5,22 @@ import RQGControlButtons from "./RQGControlButtons";
 import RQGInfo from "./RQGinfoComponent";
 import OutputView from "@/components/OutputItem";
 import QuestionHeader from "@/components/QuestionHeader";
-import { OutputData } from "@/types";
-import { useRouter } from "next/router";
-import qs from "query-string";
+import { OutputData, RQGQuestionData, SearchCriteria } from "@/types";
+import { getOutputData, searchQuestions } from "@/app/Actions";
 
 
-// the question pool is handled on the server, we just feed through
-// individual questions to the client, and the client sends search criteria
-// to the server to get a new question pool.
 interface RandomQuestionGeneratorProps {
-    // number of questions in the question pool
-    numQuestions: number;
-    currentQuestionData: OutputData;
-    // total marks of remaining questions
-    totalMarks: number;
     topics: string[];
     levels: string[];
     components: string[];
+    subject: number;
 }
 
 const RandomQuestionGenerator: React.FC<RandomQuestionGeneratorProps> = ({
-    numQuestions,
-    currentQuestionData,
-    totalMarks,
     topics,
     levels,
     components,
+    subject,
 }) => {
     const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
     const [selectedLevel, setSelectedLevel] = useState<string>("");
@@ -40,47 +30,78 @@ const RandomQuestionGenerator: React.FC<RandomQuestionGeneratorProps> = ({
     const [displayAsImages, setDisplayAsImages] = useState<boolean>(true);
     const [displayMarkscheme, setDisplayMarkscheme] = useState<boolean>(false);
     const [currentQuestionNum, setCurrentQuestionNum] = useState<number>(0);
-    const router = useRouter();
+    const [questionPool, setQuestionPool] = useState<RQGQuestionData[]>([]);
+    const [currentQuestionData, setCurrentQuestionData] = useState<OutputData>({
+        text: {
+            questionContents: "",
+            markschemeContents: "",
+        },
+        images: [],
+        paperData: {
+            year: "",
+            component: "",
+            level: "",
+            subject: "",
+        },
+        totalMarks: 0,
+        questionNumber: -1,
+    });
+
+    let totalMarks = 0;
+    const calculateTotalMarks = () => {
+        let total = 0;
+        for (let i = currentQuestionNum; i < questionPool.length; i++) {
+            total += questionPool[i].questionMarks;
+        }
+        totalMarks = total;
+    };
 
     useEffect(() => {
-        let query = {
-            topics: selectedTopics,
-            level: selectedLevel,
-            component: selectedComponent,
-            minMarks: selectedMinMarks,
-            maxMarks: selectedMaxMarks,
-            currentQuestionNum: currentQuestionNum
-        };
+        // switch questions when currentQuestionNum changes
+        if (questionPool.length > 0) {
+            getOutputData(questionPool[currentQuestionNum].questionID).then(
+                (res) => {
+                    setCurrentQuestionData(res);
+                }
+            );
+            calculateTotalMarks();
+        }
+    }
+    , [currentQuestionNum]);
 
-        const url = qs.stringifyUrl({
-            url: "/randomquestiongenerator",
-            query: query,
-        });
-
-        router.push(url);
-    }, [selectedTopics, selectedLevel, selectedComponent, selectedMinMarks, selectedMaxMarks, currentQuestionNum]);
 
     const onClickGenerate = () => {
         // call a server action to get a new question pool
         // and reset the current question number to 0
-        setCurrentQuestionNum(0);
-        let query = {
+        
+        let query: SearchCriteria = {
             topics: selectedTopics,
             level: selectedLevel,
             component: selectedComponent,
             minMarks: selectedMinMarks,
             maxMarks: selectedMaxMarks,
-            currentQuestionNum: currentQuestionNum
+            id: -1,
+            text: "",
+            paperYear: "",
+            searchInMarkscheme: false,
+            subject: subject
         };
 
-        const url = qs.stringifyUrl({
-            url: "/randomquestiongenerator",
-            query: query,
-        });
-
-        router.push(url);
-
-    }
+        // get question pool from server
+        searchQuestions(query).then((res) => {
+            // map the question objects to the RQGQuestionData type
+            let questionPool: RQGQuestionData[] = res.map((question) => {
+                return {
+                    questionID: question.id,
+                    questionMarks: question.marks,
+                };
+            });
+            setQuestionPool(questionPool);
+            setCurrentQuestionNum(0);
+            calculateTotalMarks();
+        }
+        );
+    };
 
     const onClickNext = () => {
         if (currentQuestionNum < numQuestions - 1) {
@@ -93,6 +114,8 @@ const RandomQuestionGenerator: React.FC<RandomQuestionGeneratorProps> = ({
             setCurrentQuestionNum(currentQuestionNum - 1);
         }
     };
+
+    const numQuestions = questionPool.length;
 
     // get the output data from the
     return (

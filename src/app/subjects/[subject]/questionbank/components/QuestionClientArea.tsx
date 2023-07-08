@@ -13,10 +13,12 @@ import { searchQuestions, getOutputData } from "@/app/Actions";
 
 interface QuestionOutputAreaProps {
     topics: string[];
+    subject: number;
 }
 
 const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
     topics,
+    subject,
 }) => {
     const [displayAsImages, setDisplayAsImages] = useState(true);
     const [displayMarkscheme, setDisplayMarkscheme] = useState(false);
@@ -25,9 +27,10 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
     const [selectedTopics, setSelectedTopics] = useState(topics);
     const [selectedLevel, setSelectedLevel] = useState("");
     const [selectedComponent, setSelectedComponent] = useState("");
-    const [selectedID, setSelectedID] = useState(-1);
+    // const [selectedID, setSelectedID] = useState(-1);
     const debouncedValue = useDebounce(value, 500);
     const [questions, setQuestions] = useState<Question[]>([]);
+    // use outputdata, setting a default value of an empty object
     const [outputData, setOutputData] = useState<OutputData>({
         text: {
             questionContents: "",
@@ -44,7 +47,7 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
         questionNumber: -1,
     });
 
-    // TODO may need to make these changeable by making them props, for different subjects
+    // @todo may need to make these changeable by making them props, for different subjects
     let levels = ["A", "AS"];
     let components = ["Component 1", "Component 2"];
     useEffect(() => {
@@ -59,6 +62,7 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
             maxMarks: 100,
             paperYear: "",
             searchInMarkscheme: false,
+            subject: subject,
         };
 
         // get the questions from the server
@@ -70,7 +74,7 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
     }, [debouncedValue, router, selectedTopics, selectedLevel, selectedComponent]);
     
     const handleRowClick = (id: number) => {
-        setSelectedID(id);
+        // setSelectedID(id);
         // get the output data from the server
         getOutputData(id).then((outputData) => {
             setOutputData(outputData);
