@@ -21,7 +21,6 @@ function OutputItem({ isImage, text }: OutputItemProps): JSX.Element {
   {
     // convert image file to path from public folder
     text = `/questionImages/${text}.png`
-    console.log("OutputItem: ", text);
 
   }
   return (
@@ -47,7 +46,6 @@ interface OutputViewProps {
  * @returns {JSX.Element} - the output view
  */
 export default function OutputView({ outputData, isImage, displayMarkscheme }: OutputViewProps): JSX.Element {
-  // console.log("outputData: ", outputData)
   let outputComponents: (string)[] = [];
  if (!isImage && !displayMarkscheme) {
     outputComponents.push(outputData.text.questionContents);
@@ -61,7 +59,6 @@ export default function OutputView({ outputData, isImage, displayMarkscheme }: O
       }
     }
   }
-  // console.log("outputComponents: ", outputComponents)
   return (
     
     <div className="flex flex-col

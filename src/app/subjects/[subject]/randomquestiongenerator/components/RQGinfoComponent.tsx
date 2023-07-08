@@ -3,7 +3,7 @@
 // also shows the toggles for markscheme and question image
 
 interface RQGInfoProps {
-    numQuestions: number;
+    remainingQuestions: number;
     totalMarks: number;
 }
 
@@ -12,10 +12,10 @@ interface RQGInfoProps {
  * @param {RQGInfoProps} props - The props object, containing the number of questions and total marks.
  * @returns {HTML} HTML section containing the number of questions and total marks.
  */
-const RQGInfo: React.FC<RQGInfoProps> = ({ numQuestions, totalMarks }) => {
+const RQGInfo: React.FC<RQGInfoProps> = ({ remainingQuestions, totalMarks }) => {
     return (
-        <div className="flex sm:flex-row flex-col items-center justify-center">
-            <p className="sm:text-2xl text-xl text-center">Questions in pool: {numQuestions}</p>
+        <div className="flex sm:flex-row flex-col justify-between sm:m-5">
+            <p className="sm:text-2xl text-xl text-center">Questions remaining: {remainingQuestions}</p>
             <p className="sm:text-2xl text-xl text-center">The total marks of all these questions is {totalMarks}.</p>
         </div>
         

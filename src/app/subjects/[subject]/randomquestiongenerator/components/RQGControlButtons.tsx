@@ -8,6 +8,10 @@ interface RQGControlButtonsProps {
     onClickGenerate: () => void;
     onClickNext: () => void;
     onClickPrevious: () => void;
+    // whether the previous and next buttons should be disabled
+    disablePrevious: boolean;
+    disableNext: boolean;
+    disableGenerate?: boolean;
 }
 
 /**
@@ -17,6 +21,9 @@ const RQGControlButtons: React.FC<RQGControlButtonsProps> = ({
     onClickGenerate,
     onClickNext,
     onClickPrevious,
+    disablePrevious,
+    disableNext,
+    disableGenerate = false,
 }) => {
 
     return (
@@ -24,14 +31,17 @@ const RQGControlButtons: React.FC<RQGControlButtonsProps> = ({
             <BaseButton
                 text="Generate new pool"
                 onClick={onClickGenerate}
+                enabled={!disableGenerate}
             />
             <BaseButton
                 text="Previous"
                 onClick={onClickPrevious}
+                enabled={!disablePrevious}
             />
             <BaseButton
                 text="Next"
                 onClick={onClickNext}
+                enabled={!disableNext}
             />
         </div>
     )

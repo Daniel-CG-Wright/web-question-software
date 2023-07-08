@@ -12,8 +12,6 @@ export async function searchQuestions(searchParams: SearchCriteria) {
 
 export async function getOutputData(id: number) {
     "use server"
-    console.log("getOutputData called with id: " + id)
     const outputData = await dbGetOutputData(id);
-    console.log("outputData: ", outputData);
     return outputData;
 }

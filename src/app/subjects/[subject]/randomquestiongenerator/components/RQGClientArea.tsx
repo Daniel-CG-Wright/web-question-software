@@ -6,6 +6,7 @@ import RQGInfo from "./RQGinfoComponent";
 import OutputView from "@/components/OutputItem";
 import QuestionHeader from "@/components/QuestionHeader";
 import { OutputData, RQGQuestionData, SearchCriteria } from "@/types";
+import { shuffleArray } from "@/server-util/helpers";
 import { getOutputData, searchQuestions } from "@/app/Actions";
 
 
@@ -31,6 +32,9 @@ const RandomQuestionGenerator: React.FC<RandomQuestionGeneratorProps> = ({
     const [displayMarkscheme, setDisplayMarkscheme] = useState<boolean>(false);
     const [currentQuestionNum, setCurrentQuestionNum] = useState<number>(0);
     const [questionPool, setQuestionPool] = useState<RQGQuestionData[]>([]);
+    // convenience triggers, may affect performance
+    const [generateQuestionTrigger, setGenerateQuestionTrigger] = useState<boolean>(false);
+    const [isGenerateEnabled, setIsGenerateEnabled] = useState<boolean>(true);
     const [outputData, setOutputData] = useState<OutputData>({
         text: {
             questionContents: "",
@@ -48,7 +52,7 @@ const RandomQuestionGenerator: React.FC<RandomQuestionGeneratorProps> = ({
 
 
     const numQuestions = questionPool.length;
-    console.log("current question num: " + currentQuestionNum);
+    let questionsRemaining = numQuestions - currentQuestionNum;
     
     // calculate the total marks of the remaining questions
     // in the question pool
@@ -56,17 +60,21 @@ const RandomQuestionGenerator: React.FC<RandomQuestionGeneratorProps> = ({
     questionPool.slice(currentQuestionNum).forEach((question) => {
         totalMarks += question.questionMarks;
     });
-    
+
+    useEffect(() => {
+        // if any of the search criteria change, then enable the generate question button
+        isGenerateEnabled || setIsGenerateEnabled(true);
+    }, [selectedTopics, selectedLevel, selectedComponent, selectedMinMarks, selectedMaxMarks]);
+
     useEffect(() => {
         if (questionPool.length > 0 && currentQuestionNum >= 0) {
-            // this gvies a warning adfter generate new pool is pressed.
             getOutputData(questionPool[currentQuestionNum].questionID).then(
                 (res) => {
                     setOutputData(res);
                 }
             );
         }
-    }, [currentQuestionNum]);
+    }, [currentQuestionNum, generateQuestionTrigger]);
 
     const onClickGenerate = () => {
         // call a server action to get a new question pool
@@ -94,8 +102,12 @@ const RandomQuestionGenerator: React.FC<RandomQuestionGeneratorProps> = ({
                     questionMarks: question.marks,
                 };
             });
+            // random shuffle the question pool
+            questionPool = shuffleArray(questionPool);
             setQuestionPool(questionPool);
             setCurrentQuestionNum(0);
+            setGenerateQuestionTrigger(!generateQuestionTrigger);
+            setIsGenerateEnabled(false);
         }
         );
     };
@@ -113,7 +125,7 @@ const RandomQuestionGenerator: React.FC<RandomQuestionGeneratorProps> = ({
     };
     // get the output data from the
     return (
-        <div className="flex flex-col space-y-4">
+        <div className="flex flex-col space-y-4 m-5">
             <SearchComponentCollection
                 topics={topics}
                 selectedTopics={selectedTopics}
@@ -132,11 +144,19 @@ const RandomQuestionGenerator: React.FC<RandomQuestionGeneratorProps> = ({
                 onClickGenerate={onClickGenerate}
                 onClickNext={onClickNext}
                 onClickPrevious={onClickPrevious}
+                disableNext={currentQuestionNum >= numQuestions - 1}
+                disablePrevious={currentQuestionNum <= 0}
+                disableGenerate={!isGenerateEnabled}
             />
             <RQGInfo
-                numQuestions={numQuestions}
+                remainingQuestions={questionsRemaining}
                 totalMarks={totalMarks}
             />
+            <div className="flex justify-center">
+            <div className="w-full max-w-full mx-5">
+                <progress value={questionsRemaining} max={numQuestions} className="w-full h-4 bg-blue-500 text-white rounded-md shadow-sm" />
+            </div>
+            </div>
             <QuestionHeader
                 outputData={outputData}
                 displayAsImages={displayAsImages}

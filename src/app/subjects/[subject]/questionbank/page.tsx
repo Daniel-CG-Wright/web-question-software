@@ -13,7 +13,6 @@ interface Params {
 // in the database.
 
 const Search: React.FC<Params> = async ({ params }) => {
-    console.log("searchParams: ", params);
     //const questions = await searchQuestions(searchParams);
     const subject = params.subject;
     const topics = await dbGetTopics(subject);

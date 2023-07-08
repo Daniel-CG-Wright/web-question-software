@@ -84,7 +84,6 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
         );
     }, [selectedID]);
 
-    console.log(outputData);
     return (
         <div className="h-full">
             <SearchComponentCollection
