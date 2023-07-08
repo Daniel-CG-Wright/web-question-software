@@ -1,7 +1,7 @@
-import QuestionOutputArea from "./components/QuestionClientArea";
-import searchQuestions from "@/actions/searchQuestions";
-import getOutputData from "@/actions/getOutputData";
-import getTopics from "@/actions/getTopics";
+import QuestionOutputArea from "./[subject]/components/QuestionClientArea";
+import searchQuestions from "@/routerResponses/searchQuestions";
+import getOutputData from "@/routerResponses/getOutputData";
+import getTopics from "@/routerResponses/getTopics";
 
 import { OutputData, SearchCriteria, ServerResponseOutputData } from "@/types";
 

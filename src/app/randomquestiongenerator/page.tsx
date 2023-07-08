@@ -1,6 +1,6 @@
 import { SearchCriteria, RQGQuestionData, OutputData, ServerResponseOutputData } from "@/types";
-import getRQGData from "@/actions/getRQGData";
-import getOutputData from "@/actions/getOutputData";
+import getRQGData from "@/routerResponses/getRQGData";
+import getOutputData from "@/routerResponses/getOutputData";
 import RandomQuestionGenerator from "./components/RQGClientArea";
 
 interface RQGProps {
