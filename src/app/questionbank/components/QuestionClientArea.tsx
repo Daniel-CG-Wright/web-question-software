@@ -1,5 +1,5 @@
 "use client"
-import QuestionHeader from "./QuestionHeader";
+import QuestionHeader from "@/components/QuestionHeader";
 import SearchComponentCollection from "@/components/SearchComponentCollection";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -12,14 +12,12 @@ import OutputView from "@/components/OutputItem";
 // base client area with all interactables.
 
 interface QuestionOutputAreaProps {
-    selectedQuestionCode: string;
     topics: string[];
     questions: Question[];
     outputData: OutputData;
 }
 
 const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
-    selectedQuestionCode,
     topics,
     questions,
     outputData
@@ -28,12 +26,13 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
     const [displayMarkscheme, setDisplayMarkscheme] = useState(false);
     const router = useRouter();
     const [value, setValue] = useState("");
-    const [selectedTopic, setSelectedTopic] = useState("");
+    const [selectedTopics, setSelectedTopics] = useState(topics);
     const [selectedLevel, setSelectedLevel] = useState("");
     const [selectedComponent, setSelectedComponent] = useState("");
     const [selectedID, setSelectedID] = useState(-1);
     const debouncedValue = useDebounce(value, 500);
 
+    // TODO may need to make these changeable by making them props, for different subjects
     let levels = ["A", "AS"];
     let components = ["Component 1", "Component 2"];
     useEffect(() => {
@@ -41,7 +40,7 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
         let query = {};
         if (
             debouncedValue === "" &&
-            selectedTopic === "" &&
+            selectedTopics == topics &&
             selectedLevel === "" &&
             selectedComponent === "" &&
             selectedID < 0
@@ -53,7 +52,7 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
             query = {
                 id: -1,
                 text: debouncedValue,
-                topics: selectedTopic,
+                topics: selectedTopics,
                 level: selectedLevel,
                 component: selectedComponent,
                 minMarks: -1,
@@ -70,15 +69,15 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
         });
 
         router.push(url);
-    }, [debouncedValue, router, selectedTopic, selectedLevel, selectedComponent,
+    }, [debouncedValue, router, selectedTopics, selectedLevel, selectedComponent,
         selectedID]);
     
     return (
         <div className="h-full">
             <SearchComponentCollection
                 topics={topics}
-                selectedTopic={selectedTopic}
-                setSelectedTopic={setSelectedTopic}
+                selectedTopics={selectedTopics}
+                setSelectedTopics={setSelectedTopics}
                 value={value}
                 setValue={setValue}
                 selectedLevel={selectedLevel}
@@ -96,7 +95,7 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
                 }
                 />
             <QuestionHeader
-                selectedQuestionCode={selectedQuestionCode}
+                outputData={outputData}
                 displayAsImages={displayAsImages}
                 setDisplayAsImages={setDisplayAsImages}
                 displayMarkscheme={displayMarkscheme}
