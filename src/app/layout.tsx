@@ -24,7 +24,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           <nav>
             <ul className="list-none m-10 p-0 flex">
               <li>
-                <Link href="/questionbank">Question Bank</Link>
+                <Link href="/questionbank/computerscience">Question Bank</Link>
               </li>
               <li>
                 <Link href="/randomquestiongenerator">Random Question Generator</Link>

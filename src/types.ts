@@ -9,7 +9,6 @@ export interface SearchCriteria {
     maxMarks: number,
     paperYear: string,
     searchInMarkscheme: boolean,
-    selectedID: number,
 }
 
 // Data for a specific question, used primarily for the question bank table.

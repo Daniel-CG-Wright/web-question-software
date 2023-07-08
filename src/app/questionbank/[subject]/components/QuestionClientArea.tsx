@@ -3,24 +3,20 @@ import QuestionHeader from "@/components/QuestionHeader";
 import SearchComponentCollection from "@/components/SearchComponentCollection";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import qs from "query-string";
 import useDebounce from "@/hooks/useDebounce";
-import {OutputData, Question} from "@/types";
+import {OutputData, Question, SearchCriteria} from "@/types";
 import QuestionTable from "./QuestionTable";
 import OutputView from "@/components/OutputItem";
+import { searchQuestions, getOutputData } from "@/app/Actions";
 
 // base client area with all interactables.
 
 interface QuestionOutputAreaProps {
     topics: string[];
-    questions: Question[];
-    outputData: OutputData;
 }
 
 const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
     topics,
-    questions,
-    outputData
 }) => {
     const [displayAsImages, setDisplayAsImages] = useState(true);
     const [displayMarkscheme, setDisplayMarkscheme] = useState(false);
@@ -31,47 +27,56 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
     const [selectedComponent, setSelectedComponent] = useState("");
     const [selectedID, setSelectedID] = useState(-1);
     const debouncedValue = useDebounce(value, 500);
+    const [questions, setQuestions] = useState<Question[]>([]);
+    const [outputData, setOutputData] = useState<OutputData>({
+        text: {
+            questionContents: "",
+            markschemeContents: "",
+        },
+        images: [],
+        paperData: {
+            year: "",
+            component: "",
+            level: "",
+            subject: "",
+        },
+        totalMarks: 0,
+        questionNumber: -1,
+    });
 
     // TODO may need to make these changeable by making them props, for different subjects
     let levels = ["A", "AS"];
     let components = ["Component 1", "Component 2"];
     useEffect(() => {
         // if all the search criteria are default, then don't search
-        let query = {};
-        if (
-            debouncedValue === "" &&
-            selectedTopics == topics &&
-            selectedLevel === "" &&
-            selectedComponent === "" &&
-            selectedID < 0
-        ) {
-            query = {};
-        }
-        else
-        {
-            query = {
-                id: -1,
-                text: debouncedValue,
-                topics: selectedTopics,
-                level: selectedLevel,
-                component: selectedComponent,
-                minMarks: -1,
-                maxMarks: 100,
-                paperYear: "",
-                searchInMarkscheme: false,
-                selectedID: selectedID,
-                };
-        }
+        let searchCriteria: SearchCriteria = {
+            text: debouncedValue,
+            topics: selectedTopics,
+            level: selectedLevel,
+            component: selectedComponent,
+            id: -1,
+            minMarks: 0,
+            maxMarks: 100,
+            paperYear: "",
+            searchInMarkscheme: false,
+        };
 
-        const url = qs.stringifyUrl({
-        url: "/questionbank",
-        query,
-        });
+        // get the questions from the server
+        searchQuestions(searchCriteria).then((questions) => {
+            setQuestions(questions);
+        }
+        );
 
-        router.push(url);
-    }, [debouncedValue, router, selectedTopics, selectedLevel, selectedComponent,
-        selectedID]);
+    }, [debouncedValue, router, selectedTopics, selectedLevel, selectedComponent]);
     
+    const handleRowClick = (id: number) => {
+        setSelectedID(id);
+        // get the output data from the server
+        getOutputData(id).then((outputData) => {
+            setOutputData(outputData);
+        }
+        );
+    }
     return (
         <div className="h-full">
             <SearchComponentCollection
@@ -90,7 +95,7 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
             <QuestionTable
                 questions={questions}
                 onClickRow={(id) => {
-                    setSelectedID(id);
+                    handleRowClick(id);
                 }
                 }
                 />
