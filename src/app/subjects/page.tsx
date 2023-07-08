@@ -9,7 +9,7 @@ export default function Subjects() {
             <nav>
                 <ul className="list-none m-10 p-0 flex">
                 <li>
-                    <Link href="/subjects/1/randomquestiongenerator">Question Bank</Link>
+                    <Link href="/subjects/1/">Computer Science A/AS</Link>
                 </li>
                 </ul>
             </nav>

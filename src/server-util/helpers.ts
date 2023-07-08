@@ -13,3 +13,17 @@ export const shuffleArray = (array: any[]) => {
     return array;
 }
 
+/**
+ * Makes a given string titlecase.
+ * @param {string} str - string to make titlecase
+ * @returns {string} - titlecase string
+ */
+export const toTitleCase = (str: string) => {
+    return str
+    .toLowerCase()
+    .split(' ')
+    .map(function(word) {
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(' ');
+}

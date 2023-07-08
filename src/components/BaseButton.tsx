@@ -18,9 +18,8 @@ const BaseButton: React.FC<BaseButtonProps> = ({
         <button
             className={`
             ${className}
-            bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${
-                !enabled ? 'opacity-50 cursor-not-allowed hover:bg-blue-500' : ''
-              }`}
+            basebutton
+              `}
             onClick={onClick}
             disabled={!enabled}
         >

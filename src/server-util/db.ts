@@ -311,4 +311,36 @@ function dbGetLevels(subjectID: number): Promise<string[]> {
 }
 
 
-export { dbGetQuestions, dbGetTopics, dbGetOutputData, dbGetComponents, dbGetLevels };
+/**
+ * Get the subject name for a given subject ID
+ * @param {number} subjectID - the subject ID to get the name for
+ * @returns {Promise<string>} - a promise for the results of the query - a string representing the levels + subject name
+ */
+function dbGetSubjectName(subjectID: number): Promise<string> {
+  let query = `
+    SELECT
+      SubjectName,
+      isGCSE
+    FROM
+        Subject
+    WHERE
+        Subject.SubjectID = ?;
+    `;
+  return selectQuery(query, [subjectID])
+    .then((results) => {
+      // add A/AS to the front of the subject name if not GCSE, otherwise return GCSE + subject name
+      if (results[0].isGCSE === 0) {
+        return `A/AS ${results[0].SubjectName}`;
+      }
+      else {
+        return `GCSE ${results[0].SubjectName}`;
+      }
+
+    })
+    .catch((error) => {
+      throw error;
+    }
+    );
+}
+
+export { dbGetQuestions, dbGetTopics, dbGetOutputData, dbGetComponents, dbGetLevels , dbGetSubjectName};
