@@ -1,6 +1,3 @@
-import { SearchCriteria, RQGQuestionData, OutputData } from "@/types";
-import getRQGData from "@/ServerFunctions/getRQGData";
-import getOutputData from "@/ServerFunctions/getOutputData";
 import RandomQuestionGenerator from "./components/RQGClientArea";
 import getInitData from "@/ServerFunctions/getInitData";
 

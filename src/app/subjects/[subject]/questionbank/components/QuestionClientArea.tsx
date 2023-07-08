@@ -27,7 +27,7 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
     const [selectedTopics, setSelectedTopics] = useState(topics);
     const [selectedLevel, setSelectedLevel] = useState("");
     const [selectedComponent, setSelectedComponent] = useState("");
-    // const [selectedID, setSelectedID] = useState(-1);
+    const [selectedID, setSelectedID] = useState(-1);
     const debouncedValue = useDebounce(value, 500);
     const [questions, setQuestions] = useState<Question[]>([]);
     // use outputdata, setting a default value of an empty object
@@ -41,13 +41,12 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
             year: "",
             component: "",
             level: "",
-            subject: "",
         },
         totalMarks: 0,
         questionNumber: -1,
     });
 
-    // @todo may need to make these changeable by making them props, for different subjects
+    // TODO may need to make these changeable by making them props, for different subjects
     let levels = ["A", "AS"];
     let components = ["Component 1", "Component 2"];
     useEffect(() => {
@@ -73,14 +72,19 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
 
     }, [debouncedValue, router, selectedTopics, selectedLevel, selectedComponent]);
     
-    const handleRowClick = (id: number) => {
-        // setSelectedID(id);
+    useEffect(() => {
+        // if the selectedID is -1, then we don't need to get the output data
+        if (selectedID === -1) {
+            return;
+        }
         // get the output data from the server
-        getOutputData(id).then((outputData) => {
+        getOutputData(selectedID).then((outputData) => {
             setOutputData(outputData);
         }
         );
-    }
+    }, [selectedID]);
+
+    console.log(outputData);
     return (
         <div className="h-full">
             <SearchComponentCollection
@@ -99,7 +103,7 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
             <QuestionTable
                 questions={questions}
                 onClickRow={(id) => {
-                    handleRowClick(id);
+                    setSelectedID(id);
                 }
                 }
                 />

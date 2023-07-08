@@ -1,6 +1,4 @@
 import QuestionOutputArea from "./components/QuestionClientArea";
-import searchQuestions from "@/ServerFunctions/searchQuestions";
-import getOutputData from "@/ServerFunctions/getOutputData";
 import { dbGetTopics } from "@/server-util/db";
 
 import { OutputData, SearchCriteria } from "@/types";

@@ -28,7 +28,6 @@ export interface PaperData {
     year: string,
     component: string,
     level: string,
-    subject: string,
 }
 
 // image ID and whether the image is part of the markscheme, so that it can be displayed differently

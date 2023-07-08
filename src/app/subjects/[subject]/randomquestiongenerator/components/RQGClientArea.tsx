@@ -31,7 +31,7 @@ const RandomQuestionGenerator: React.FC<RandomQuestionGeneratorProps> = ({
     const [displayMarkscheme, setDisplayMarkscheme] = useState<boolean>(false);
     const [currentQuestionNum, setCurrentQuestionNum] = useState<number>(0);
     const [questionPool, setQuestionPool] = useState<RQGQuestionData[]>([]);
-    const [currentQuestionData, setCurrentQuestionData] = useState<OutputData>({
+    const [outputData, setOutputData] = useState<OutputData>({
         text: {
             questionContents: "",
             markschemeContents: "",
@@ -41,34 +41,32 @@ const RandomQuestionGenerator: React.FC<RandomQuestionGeneratorProps> = ({
             year: "",
             component: "",
             level: "",
-            subject: "",
         },
         totalMarks: 0,
         questionNumber: -1,
     });
 
-    let totalMarks = 0;
-    const calculateTotalMarks = () => {
-        let total = 0;
-        for (let i = currentQuestionNum; i < questionPool.length; i++) {
-            total += questionPool[i].questionMarks;
-        }
-        totalMarks = total;
-    };
 
+    const numQuestions = questionPool.length;
+    console.log("current question num: " + currentQuestionNum);
+    
+    // calculate the total marks of the remaining questions
+    // in the question pool
+    let totalMarks = 0;
+    questionPool.slice(currentQuestionNum).forEach((question) => {
+        totalMarks += question.questionMarks;
+    });
+    
     useEffect(() => {
-        // switch questions when currentQuestionNum changes
-        if (questionPool.length > 0) {
+        if (questionPool.length > 0 && currentQuestionNum >= 0) {
+            // this gvies a warning adfter generate new pool is pressed.
             getOutputData(questionPool[currentQuestionNum].questionID).then(
                 (res) => {
-                    setCurrentQuestionData(res);
+                    setOutputData(res);
                 }
             );
-            calculateTotalMarks();
         }
-    }
-    , [currentQuestionNum]);
-
+    }, [currentQuestionNum]);
 
     const onClickGenerate = () => {
         // call a server action to get a new question pool
@@ -98,7 +96,6 @@ const RandomQuestionGenerator: React.FC<RandomQuestionGeneratorProps> = ({
             });
             setQuestionPool(questionPool);
             setCurrentQuestionNum(0);
-            calculateTotalMarks();
         }
         );
     };
@@ -114,9 +111,6 @@ const RandomQuestionGenerator: React.FC<RandomQuestionGeneratorProps> = ({
             setCurrentQuestionNum(currentQuestionNum - 1);
         }
     };
-
-    const numQuestions = questionPool.length;
-
     // get the output data from the
     return (
         <div className="flex flex-col space-y-4">
@@ -144,14 +138,14 @@ const RandomQuestionGenerator: React.FC<RandomQuestionGeneratorProps> = ({
                 totalMarks={totalMarks}
             />
             <QuestionHeader
-                outputData={currentQuestionData}
+                outputData={outputData}
                 displayAsImages={displayAsImages}
                 displayMarkscheme={displayMarkscheme}
                 setDisplayAsImages={setDisplayAsImages}
                 setDisplayMarkscheme={setDisplayMarkscheme}
             />
             <OutputView
-                outputData={currentQuestionData}
+                outputData={outputData}
                 isImage={displayAsImages}
                 displayMarkscheme={displayMarkscheme}
             />

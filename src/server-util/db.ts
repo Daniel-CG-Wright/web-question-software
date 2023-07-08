@@ -239,7 +239,6 @@ function dbGetOutputData(questionID: number): Promise<OutputData> {
           year: results[0].paperYear,
           component: results[0].paperComponent,
           level: results[0].paperLevel,
-          subject: results[0].paperSubject,
         },
         text: {
           questionContents: results[0].questionText,
