@@ -2,19 +2,18 @@
 import React, { ChangeEvent } from 'react';
 
 interface LevelSelectProps {
-  selectedLevel: string;
   setSelectedLevel: (level: string) => void;
   levels: string[];
 }
 
-const LevelSelect: React.FC<LevelSelectProps> = ({ selectedLevel, setSelectedLevel, levels }) => {
+const LevelSelect: React.FC<LevelSelectProps> = ({ setSelectedLevel, levels }) => {
   const handleLevelChange = (event: ChangeEvent<HTMLSelectElement>): void => {
     setSelectedLevel(event.target.value);
   };
 
   return (
     <div>
-      <select className = "dropdown" value={selectedLevel} onChange={handleLevelChange}>
+      <select className = "dropdown" onChange={handleLevelChange}>
         <option value="">All levels</option>
         {levels.map((level, index) => (
           <option value={level.toLowerCase()} key={index}>

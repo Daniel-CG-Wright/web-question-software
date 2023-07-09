@@ -94,3 +94,19 @@ Also disable the dropdown arrow from highlighting when hovered by doing pointer-
     opacity: 0.5;
   }
   
+
+/* Default spin box styles */
+.spinbox {
+  @apply 
+    appearance-none 
+    bg-white 
+    border 
+    border-gray-400 
+    rounded-md
+    w-16 
+    py-2 
+    px-3 
+    text-gray-700 
+    leading-tight 
+    focus:outline-black;
+}

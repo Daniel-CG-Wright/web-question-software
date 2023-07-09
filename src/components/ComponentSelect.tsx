@@ -22,6 +22,7 @@ const ComponentSelect: React.FC<ComponentSelectProps> = ({
   };
 
   // if the user selects AS, then disable the component select as there is only one component.
+  // will need to change this for other subjects
   if (selectedLevel.toLowerCase() === "as")
   {
     return (
