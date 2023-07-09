@@ -8,6 +8,7 @@ import {OutputData, Question, SearchCriteria} from "@/types";
 import QuestionTable from "./QuestionTable";
 import OutputView from "@/components/OutputItem";
 import { searchQuestions, getOutputData } from "@/app/Actions";
+import { }
 
 // base client area with all interactables.
 
@@ -46,9 +47,8 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
         questionNumber: -1,
     });
 
-    // TODO may need to make these changeable by making them props, for different subjects
-    let levels = ["A", "AS"];
-    let components = ["Component 1", "Component 2"];
+    // switch components if the level changes
+    
     useEffect(() => {
         // if all the search criteria are default, then don't search
         let searchCriteria: SearchCriteria = {
@@ -92,9 +92,7 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
                 setSelectedTopics={setSelectedTopics}
                 value={value}
                 setValue={setValue}
-                selectedLevel={selectedLevel}
                 setSelectedLevel={setSelectedLevel}
-                selectedComponent={selectedComponent}
                 setSelectedComponent={setSelectedComponent}
                 levels={levels}
                 components={components}

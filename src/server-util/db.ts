@@ -206,8 +206,8 @@ function dbGetOutputData(questionID: number): Promise<OutputData> {
     SELECT
         Question.QuestionNumber AS questionNumber,
         Paper.PaperYear AS paperYear,
-        Paper.PaperComponent AS paperComponent,
-        Paper.PaperLevel AS paperLevel,
+        LevelComponent.ComponentID AS paperComponent,
+        SubjectLevel.LevelID AS paperLevel,
         Question.QuestionContents AS questionText,
         Question.MarkschemeContents AS markschemeText,
         Images.ImageID AS imageID,
@@ -223,6 +223,14 @@ function dbGetOutputData(questionID: number): Promise<OutputData> {
         Images
     ON
         Question.QuestionID = Images.QuestionID
+    INNER JOIN
+        LevelComponent
+    ON
+        Paper.LevelComponentID = LevelComponent.LevelComponentID
+    INNER JOIN
+        SubjectLevel
+    ON
+        LevelComponent.SubjectLevelID = SubjectLevel.SubjectLevelID
     WHERE
         Question.QuestionID = ?
     ORDER BY
@@ -259,20 +267,30 @@ function dbGetOutputData(questionID: number): Promise<OutputData> {
 
 
 /**
- * This function gets the distinct components for a given subjectID
+ * This function gets the distinct components for a given subjectID and selected level
  * @param {number} subjectID - the subjectID to get the components for
+ * @param {string} level - the level to get the components for - e.g. "as", "a". if left blank, all components will be returned
  * @returns {Promise<string[]>} - a promise for the results of the query - an array of strings representing the components
  */
-function dbGetComponents(subjectID: number): Promise<string[]> {
+function dbGetComponents(subjectID: number, level: string = ""): Promise<string[]> {
+
+  // @note MAY NEED TO LINK Components together (e.g. component 1 linked to unit 1)
+  // Could do with even/odd numbers being checked
+
   let query = `
     SELECT DISTINCT
-        Paper.PaperComponent
+        LevelComponent.ComponentID AS PaperComponent
     FROM
-        Paper
+        LevelComponent
+    INNER JOIN
+        SubjectLevel
+    ON
+        LevelComponent.SubjectLevelID = SubjectLevel.SubjectLevelID
     WHERE
-        Paper.PaperSubjectID = ?
+        SubjectLevel.SubjectID = ?
+    ${level ? "AND SubjectLevel.LevelID = ?" : ""}
     ORDER BY
-        Paper.PaperComponent ASC;
+        LevelComponent.ComponentID ASC;
     `;
   return selectQuery(query, [subjectID])
     .then((results) => {
@@ -292,13 +310,13 @@ function dbGetComponents(subjectID: number): Promise<string[]> {
 function dbGetLevels(subjectID: number): Promise<string[]> {
   let query = `
     SELECT DISTINCT
-        Paper.PaperLevel
+        SubjectLevel.LevelID AS PaperLevel
     FROM
-        Paper
+        SubjectLevel
     WHERE
-        Paper.PaperSubjectID = ?
+        SubjectLevel.SubjectID = ?
     ORDER BY
-        Paper.PaperLevel ASC;
+        SubjectLevel.LevelID ASC;
     `;
   return selectQuery(query, [subjectID])
     .then((results) => {
@@ -313,6 +331,7 @@ function dbGetLevels(subjectID: number): Promise<string[]> {
 
 /**
  * Get the subject name for a given subject ID
+ * @note this may need to be changed to get specific levels, and the isGCSE flag is obsoleted by the specific levels.
  * @param {number} subjectID - the subject ID to get the name for
  * @returns {Promise<string>} - a promise for the results of the query - a string representing the levels + subject name
  */

@@ -13,7 +13,6 @@ interface SearchComponentCollectionProps {
     value: string;
     setValue: (value: string) => void;
     setSelectedLevel: (level: string) => void;
-    selectedComponent: string;
     setSelectedComponent: (component: string) => void;
     levels: string[];
     components: string[];
@@ -27,7 +26,6 @@ const SearchComponentCollection: React.FC<SearchComponentCollectionProps> = ({
     value,
     setValue,
     setSelectedLevel,
-    selectedComponent,
     setSelectedComponent,
     levels,
     components,
@@ -60,10 +58,8 @@ const SearchComponentCollection: React.FC<SearchComponentCollectionProps> = ({
         levels={levels}
       />
       <ComponentSelect
-        selectedComponent={selectedComponent}
         selectComponent={setSelectedComponent}
         components={components}
-        selectedLevel = {selectedLevel}
       />
     </div>
   );

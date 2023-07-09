@@ -11,6 +11,16 @@ const LevelSelect: React.FC<LevelSelectProps> = ({ setSelectedLevel, levels }) =
     setSelectedLevel(event.target.value);
   };
 
+  // if there is only 1 level, disable the dropdown
+  if (levels.length === 1)
+  {
+    return (
+      <select className = "dropdown" onChange={handleLevelChange} value={levels[0]} disabled>
+        <option value={levels[0]}>{levels[0]}</option>
+      </select>
+    );
+  }
+
   return (
     <div>
       <select className = "dropdown" onChange={handleLevelChange}>
