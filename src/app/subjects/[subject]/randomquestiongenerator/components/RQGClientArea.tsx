@@ -139,9 +139,10 @@ const RandomQuestionGenerator: React.FC<RandomQuestionGeneratorProps> = ({
                 levels={levels}
                 components={components}
                 includeSearchBar={false}
-                defaultMaxMarks={maxMarks}
                 setMinMarks={setSelectedMinMarks}
                 setMaxMarks={setSelectedMaxMarks}
+                minMarks={selectedMinMarks}
+                maxMarks={selectedMaxMarks}
                 selectedLevel={selectedLevel}
             />
             <RQGControlButtons

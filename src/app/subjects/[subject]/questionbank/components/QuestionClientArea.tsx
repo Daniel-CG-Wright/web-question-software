@@ -31,7 +31,7 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
     const [displayMarkscheme, setDisplayMarkscheme] = useState(false);
     const router = useRouter();
     const [value, setValue] = useState("");
-    const [selectedTopics, setSelectedTopics] = useState([]);
+    const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
     const [selectedLevel, setSelectedLevel] = useState("");
     const [selectedComponent, setSelectedComponent] = useState("");
     const [selectedID, setSelectedID] = useState(-1);
@@ -105,9 +105,10 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
                 setSelectedComponent={setSelectedComponent}
                 levels={levels}
                 components={components}
-                defaultMaxMarks={defaultMaxMarks}
                 selectedLevel={selectedLevel}
                 setMaxMarks={setMaxMarks}
+                maxMarks={maxMarks}
+                minMarks={minMarks}
                 setMinMarks={setMinMarks}
             />
             <QuestionTable

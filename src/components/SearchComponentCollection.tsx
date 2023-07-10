@@ -19,10 +19,11 @@ interface SearchComponentCollectionProps {
     setSelectedComponent: (component: string) => void;
     setMinMarks: (minMarks: number) => void;
     setMaxMarks: (maxMarks: number) => void;
-    defaultMaxMarks: number;
     levels: string[];
     components: Components;
     includeSearchBar?: boolean;
+    minMarks: number;
+    maxMarks: number;
 }
 
 /*
@@ -43,16 +44,21 @@ const SearchComponentCollection: React.FC<SearchComponentCollectionProps> = ({
     levels,
     components,
     includeSearchBar = true,
-    defaultMaxMarks,
+    minMarks,
+    maxMarks
 }) => {
 
   let componentsForSelectedLevel;
   if (selectedLevel == "") {
     componentsForSelectedLevel = components["all"]
   } else {
-    componentsForSelectedLevel = components[selectedLevel]
+    componentsForSelectedLevel = components[selectedLevel.toLowerCase()]
   }
+  
 
+  console.log("selected level: " + selectedLevel)
+  console.log("components for selected level: " + componentsForSelectedLevel)
+  console.log("components: " + components)
   return (
     <div className="
     flex
@@ -85,7 +91,8 @@ const SearchComponentCollection: React.FC<SearchComponentCollectionProps> = ({
       <MinMaxMarks
         setMinMarks={setMinMarks}
         setMaxMarks={setMaxMarks}
-        defaultMaxMarks={defaultMaxMarks}
+        maxMarks={maxMarks}
+        minMarks={minMarks}
       />
     </div>
   );

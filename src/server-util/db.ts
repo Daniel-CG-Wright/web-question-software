@@ -108,8 +108,8 @@ function dbGetQuestions(criteria: SearchCriteria): Promise<Question[]> {
             INNER JOIN DisplayComponent ON LevelComponent.DisplayComponentID = DisplayComponent.DisplayComponentID
             WHERE
               SubjectLevel.SubjectID = ${subject}
-              AND DisplayComponent.DisplayComponentID = ${component}
-              ${level ? `AND SubjectLevel.LevelID = ${level}` : ''}
+              AND DisplayComponent.DisplayComponentID = '${component}'
+              ${level ? `AND SubjectLevel.LevelID = '${level}'` : ''}
           )
         `;
     conditions.push(logicalComponentsQuery);
@@ -117,7 +117,7 @@ function dbGetQuestions(criteria: SearchCriteria): Promise<Question[]> {
   }
 
   if (level) {
-    conditions.push(`SubjectLevel.LevelID = ${level}`);
+    conditions.push(`SubjectLevel.LevelID = '${level}'`);
   }
 
   // add min and max marks
@@ -317,8 +317,8 @@ return selectQuery(query, [subjectID])
   const allComponents: string[] = [];
 
   results.forEach((row: any) => {
-    const levelID = row.LevelID;
-    const displayComponent = row.DisplayComponent;
+    const levelID = row.LevelID.toLowerCase();
+    const displayComponent = row.DisplayComponent.toLowerCase();
 
     if (displayComponentsByLevel.hasOwnProperty(levelID)) {
       displayComponentsByLevel[levelID].push(displayComponent);
