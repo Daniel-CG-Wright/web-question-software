@@ -62,6 +62,11 @@ export interface RQGQuestionData {
 // have accurate input data to be selected from.
 export interface ToolInitData {
     topics: string[],
-    components: string[],
+    components: Components,
     levels: string[],
+    defaultMaxMarks: number,
+}
+
+export interface Components {
+    [level: string]: string[],
 }

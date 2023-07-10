@@ -11,10 +11,13 @@ const RQGPage: React.FC<Params> = async ({
     params
     }) => {
         const subject = params.subject;
+        // components will be a dictionary of all the components
+        // for each of the levels
         const {
             topics,
             levels,
             components,
+            defaultMaxMarks,
         }
             = await getInitData(subject);
             
@@ -27,6 +30,7 @@ const RQGPage: React.FC<Params> = async ({
                     levels={levels}
                     components={components}
                     subject={params.subject}
+                    maxMarks={defaultMaxMarks}
                 />
             </>
         );

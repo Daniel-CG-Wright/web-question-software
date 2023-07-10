@@ -1,5 +1,5 @@
 import QuestionOutputArea from "./components/QuestionClientArea";
-import { dbGetTopics } from "@/server-util/db";
+import getInitData from "@/ServerFunctions/getInitData";
 
 import { OutputData, SearchCriteria } from "@/types";
 
@@ -15,7 +15,14 @@ interface Params {
 const Search: React.FC<Params> = async ({ params }) => {
     //const questions = await searchQuestions(searchParams);
     const subject = params.subject;
-    const topics = await dbGetTopics(subject);
+    const {
+        topics,
+        levels,
+        components,
+        defaultMaxMarks,
+    }
+        = await getInitData(subject);
+    
     // fetching data for interactive components is performed in the output area client component.
 
     return (
@@ -23,6 +30,9 @@ const Search: React.FC<Params> = async ({ params }) => {
             <QuestionOutputArea
                 topics={topics}
                 subject={subject}
+                levels={levels}
+                components={components}
+                defaultMaxMarks={defaultMaxMarks}
             />
         </>
     );

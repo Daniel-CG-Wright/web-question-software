@@ -4,6 +4,8 @@ import SearchInput from "./SearchBar";
 import TopicsCombobox from "./TopicsCombobox";
 import LevelSelect from "./LevelSelect";
 import ComponentSelect from "./ComponentSelect";
+import MinMaxMarks from "./MinMaxMarks";
+import { Components } from "@/types";
 
 
 interface SearchComponentCollectionProps {
@@ -11,14 +13,22 @@ interface SearchComponentCollectionProps {
     selectedTopics: string[];
     setSelectedTopics: (topics: string[]) => void;
     value: string;
+    selectedLevel: string;
     setValue: (value: string) => void;
     setSelectedLevel: (level: string) => void;
     setSelectedComponent: (component: string) => void;
+    setMinMarks: (minMarks: number) => void;
+    setMaxMarks: (maxMarks: number) => void;
+    defaultMaxMarks: number;
     levels: string[];
-    components: string[];
+    components: Components;
     includeSearchBar?: boolean;
 }
 
+/*
+Collection of all the search components, including the search bar, topics combobox, level select, component select, and min/max marks.
+Handles switching components based on the selected level.
+*/
 const SearchComponentCollection: React.FC<SearchComponentCollectionProps> = ({
   topics,
   selectedTopics,
@@ -27,10 +37,21 @@ const SearchComponentCollection: React.FC<SearchComponentCollectionProps> = ({
     setValue,
     setSelectedLevel,
     setSelectedComponent,
+    setMinMarks,
+    setMaxMarks,
+    selectedLevel,
     levels,
     components,
     includeSearchBar = true,
+    defaultMaxMarks,
 }) => {
+
+  let componentsForSelectedLevel;
+  if (selectedLevel == "") {
+    componentsForSelectedLevel = components["all"]
+  } else {
+    componentsForSelectedLevel = components[selectedLevel]
+  }
 
   return (
     <div className="
@@ -59,7 +80,12 @@ const SearchComponentCollection: React.FC<SearchComponentCollectionProps> = ({
       />
       <ComponentSelect
         selectComponent={setSelectedComponent}
-        components={components}
+        components={componentsForSelectedLevel}
+      />
+      <MinMaxMarks
+        setMinMarks={setMinMarks}
+        setMaxMarks={setMaxMarks}
+        defaultMaxMarks={defaultMaxMarks}
       />
     </div>
   );

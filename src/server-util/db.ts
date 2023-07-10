@@ -1,6 +1,6 @@
 import mysql from 'mysql';
 import { SearchCriteria, Question } from '@/types';
-import { Image, Text, PaperData, OutputData, RQGQuestionData } from '@/types';
+import { Image, Text, PaperData, OutputData, RQGQuestionData, Components } from '@/types';
 // Create a connection to the database
 const connection = mysql.createConnection({
   host: 'localhost',
@@ -53,7 +53,7 @@ function dbGetQuestions(criteria: SearchCriteria): Promise<Question[]> {
   let query = `
     SELECT
         Question.QuestionID AS QuestionID,
-        CONCAT(Paper.PaperYear, '-', Paper.PaperComponent, '-', Paper.PaperLevel) AS PaperCode,
+        CONCAT(Paper.PaperYear, '-', LevelComponent.ComponentID, '-', SubjectLevel.LevelID) AS PaperCode,
         Question.QuestionNumber AS QuestionNumber,
         Question.QuestionContents AS QuestionText,
         Question.TotalMarks AS TotalMarks,
@@ -69,10 +69,12 @@ function dbGetQuestions(criteria: SearchCriteria): Promise<Question[]> {
         Paper
         JOIN Question ON Paper.PaperID = Question.PaperID
         LEFT JOIN QuestionTopic ON Question.QuestionID = QuestionTopic.QuestionID
+        INNER JOIN LevelComponent ON Paper.LevelComponentID = LevelComponent.LevelComponentID
+        INNER JOIN SubjectLevel ON LevelComponent.SubjectLevelID = SubjectLevel.SubjectLevelID
     WHERE
         `;
 
-  let conditions: string[] = [`Paper.PaperSubjectID = ${subject}`];
+  let conditions: string[] = [`SubjectLevel.SubjectID = ${subject}`];
 
   if (text) {
     // escape single quotes in search string
@@ -92,25 +94,30 @@ function dbGetQuestions(criteria: SearchCriteria): Promise<Question[]> {
   }
 
   if (component) {
-    let components: string[] = [component];
-    // if component 1, add "unit 1" and "unit 3" to extra components
-    if (component.toLowerCase() === 'component 1') {
-      components.push('unit 1');
-      components.push('unit 3');
-    }
-    // if component 2, add "unit 2" and "unit 4" to extra components
-    else if (component.toLowerCase() === 'component 2') {
-      components.push('unit 2');
-      components.push('unit 4');
-    }
-    // add each component to the conditions array
-    let componentQueries = components.map((component: string) => `Paper.PaperComponent = '${component}'`);
-    // join the component queries with OR
-    conditions.push(`(${componentQueries.join(' OR ')})`);
+    // get the logical components from levelComponent linked to the
+    // component selected by the user in displayComponent, and the subject
+    // selected by the user and the level selected by the user
+    let logicalComponentsQuery = `
+            
+          LevelComponent.LevelComponentID IN (
+            SELECT
+              LevelComponent.LevelComponentID
+            FROM
+              LevelComponent
+            INNER JOIN SubjectLevel ON LevelComponent.SubjectLevelID = SubjectLevel.SubjectLevelID
+            INNER JOIN DisplayComponent ON LevelComponent.DisplayComponentID = DisplayComponent.DisplayComponentID
+            WHERE
+              SubjectLevel.SubjectID = ${subject}
+              AND DisplayComponent.DisplayComponentID = ${component}
+              ${level ? `AND SubjectLevel.LevelID = ${level}` : ''}
+          )
+        `;
+    conditions.push(logicalComponentsQuery);
+
   }
 
   if (level) {
-    conditions.push(`Paper.PaperLevel = '${level}'`);
+    conditions.push(`SubjectLevel.LevelID = ${level}`);
   }
 
   // add min and max marks
@@ -137,8 +144,6 @@ function dbGetQuestions(criteria: SearchCriteria): Promise<Question[]> {
     GROUP BY
     Question.QuestionID,
     Paper.PaperYear,
-    Paper.PaperComponent,
-    Paper.PaperLevel,
     Question.QuestionNumber,
     Question.QuestionContents,
     Question.TotalMarks
@@ -146,7 +151,7 @@ function dbGetQuestions(criteria: SearchCriteria): Promise<Question[]> {
         Question.QuestionID ASC;
     `;
 
-   // console.log(query);
+   console.log(query);
   return new Promise((resolve, reject) => {
     selectQuery(query, [])
       .then((results) => {
@@ -182,7 +187,9 @@ function dbGetTopics(subjectID: number): Promise<string[]> {
     FROM paper p
     JOIN question q ON p.PaperID = q.PaperID
     JOIN questiontopic qt ON q.QuestionID = qt.QuestionID
-    WHERE p.PaperSubjectID = ${subjectID};    
+    INNER JOIN levelComponent lc on p.levelComponentID = lc.levelComponentID
+    INNER JOIN subjectLevel sl on lc.subjectLevelID = sl.subjectLevelID
+    WHERE sl.subjectID = ${subjectID}
       `;
     selectQuery(query, [])
       .then((results) => {
@@ -267,39 +274,67 @@ function dbGetOutputData(questionID: number): Promise<OutputData> {
 
 
 /**
- * This function gets the distinct components for a given subjectID and selected level
+ * This function gets the distinct display components for a given subjectID and selected level. Should
+ * return an object of components, with the key being the level and the value being an array of the display components
+ * for that level.
  * @param {number} subjectID - the subjectID to get the components for
- * @param {string} level - the level to get the components for - e.g. "as", "a". if left blank, all components will be returned
- * @returns {Promise<string[]>} - a promise for the results of the query - an array of strings representing the components
+ * @returns {Promise<Components>} - a promise for the results of the query - an object of components, with the key being the level and the value being an array of the display components for that level
  */
-function dbGetComponents(subjectID: number, level: string = ""): Promise<string[]> {
+function dbGetComponents(subjectID: number): Promise<Components> {
 
   // @note MAY NEED TO LINK Components together (e.g. component 1 linked to unit 1)
   // Could do with even/odd numbers being checked
 
   let query = `
-    SELECT DISTINCT
-        LevelComponent.ComponentID AS PaperComponent
-    FROM
-        LevelComponent
-    INNER JOIN
-        SubjectLevel
-    ON
-        LevelComponent.SubjectLevelID = SubjectLevel.SubjectLevelID
-    WHERE
-        SubjectLevel.SubjectID = ?
-    ${level ? "AND SubjectLevel.LevelID = ?" : ""}
-    ORDER BY
-        LevelComponent.ComponentID ASC;
+  SELECT DISTINCT sl.LevelID, dc.DisplayComponent
+  FROM SubjectLevel sl
+  JOIN LevelComponent lc ON sl.SubjectLevelID = lc.SubjectLevelID
+  JOIN DisplayComponent dc ON lc.DisplayComponentID = dc.DisplayComponentID
+  WHERE sl.SubjectID = ?
     `;
-  return selectQuery(query, [subjectID])
-    .then((results) => {
-      let components: string[] = [];
-      results.forEach((row: any) => {
-        components.push(row.PaperComponent);
-      });
-      return components;
-    });
+    // will return something like:
+    /*
++---------+------------------+
+| LevelID | DisplayComponent |
++---------+------------------+
+| A       | component 1      |
+| A       | component 2      |
+| AS      | component 1      |
++---------+------------------+
+    */
+
+// put the results into an object, with the key being the level and the value being an array of the display components for that level
+// for the above example, the object would be:
+/*
+{
+  A: ['component 1', 'component 2'],
+  AS: ['component 1']
+}
+*/
+return selectQuery(query, [subjectID])
+.then(results => {
+  const displayComponentsByLevel: Components = {};
+  const allComponents: string[] = [];
+
+  results.forEach((row: any) => {
+    const levelID = row.LevelID;
+    const displayComponent = row.DisplayComponent;
+
+    if (displayComponentsByLevel.hasOwnProperty(levelID)) {
+      displayComponentsByLevel[levelID].push(displayComponent);
+    } else {
+      displayComponentsByLevel[levelID] = [displayComponent];
+    }
+
+    if (!allComponents.includes(displayComponent)) {
+      allComponents.push(displayComponent);
+    }
+  });
+
+  displayComponentsByLevel['all'] = allComponents;
+
+  return displayComponentsByLevel;
+});
 }
 
 /**
@@ -362,4 +397,42 @@ function dbGetSubjectName(subjectID: number): Promise<string> {
     );
 }
 
-export { dbGetQuestions, dbGetTopics, dbGetOutputData, dbGetComponents, dbGetLevels , dbGetSubjectName};
+
+/**
+ * Get the maximum number of marks in any question for a given subject ID
+ * @param {number} subjectID - the subject ID to get the max marks for
+ * @returns {Promise<number>} - a promise for the results of the query - the maximum number of marks in any question
+ */
+function dbGetMaxMarks(subjectID: number): Promise<number> {
+  let query = `
+    SELECT
+      MAX(TotalMarks) AS maxMarks
+    FROM
+        Question
+    INNER JOIN
+        Paper
+    ON
+        Question.PaperID = Paper.PaperID
+    INNER JOIN
+        LevelComponent
+    ON
+        Paper.LevelComponentID = LevelComponent.LevelComponentID
+    INNER JOIN
+        SubjectLevel
+    ON
+        LevelComponent.SubjectLevelID = SubjectLevel.SubjectLevelID
+    WHERE
+        SubjectLevel.SubjectID = ?;
+    `;
+  return selectQuery(query, [subjectID])
+    .then((results) => {
+      return results[0].maxMarks;
+    })
+    .catch((error) => {
+      throw error;
+    }
+    );
+}
+
+
+export { dbGetQuestions, dbGetTopics, dbGetOutputData, dbGetComponents, dbGetLevels , dbGetSubjectName, dbGetMaxMarks};

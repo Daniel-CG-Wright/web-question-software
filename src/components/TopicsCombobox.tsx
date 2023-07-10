@@ -23,11 +23,7 @@ const TopicsCombobox: React.FC<TopicsComboboxProps> = ({ selectedTopics, setSele
   const handleAllTopicsChange = (event: ChangeEvent<HTMLInputElement>) => {
     const allTopicsSelected = event.target.checked;
     setAllTopicsSelected(allTopicsSelected);
-    if (allTopicsSelected) {
-      setSelectedTopics(topics);
-    } else {
-      setSelectedTopics([]);
-    }
+    setSelectedTopics([]);
   };
 
   return (

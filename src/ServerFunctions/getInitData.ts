@@ -4,7 +4,7 @@
 // 2. topics
 // 3. levels
 
-import {dbGetComponents, dbGetTopics, dbGetLevels} from '@/server-util/db';
+import {dbGetComponents, dbGetTopics, dbGetLevels, dbGetMaxMarks} from '@/server-util/db';
 import { ToolInitData } from '@/types';
 
 /**
@@ -12,13 +12,16 @@ import { ToolInitData } from '@/types';
  * @returns ToolInitData
  */
 const getInitData = async (subjectID: number): Promise<ToolInitData> => {
+    // dictionary of all display components for all the levels
     let components = await dbGetComponents(subjectID);
     let topics = await dbGetTopics(subjectID);
     let levels = await dbGetLevels(subjectID);
+    let defaultMaxMarks = await dbGetMaxMarks(subjectID);
     return {
         components: components,
         topics: topics,
         levels: levels,
+        defaultMaxMarks: defaultMaxMarks
     }
 }
 

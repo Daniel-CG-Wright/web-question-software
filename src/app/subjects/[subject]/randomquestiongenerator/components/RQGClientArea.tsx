@@ -5,7 +5,7 @@ import RQGControlButtons from "./RQGControlButtons";
 import RQGInfo from "./RQGinfoComponent";
 import OutputView from "@/components/OutputItem";
 import QuestionHeader from "@/components/QuestionHeader";
-import { OutputData, RQGQuestionData, SearchCriteria } from "@/types";
+import { Components, OutputData, RQGQuestionData, SearchCriteria } from "@/types";
 import { shuffleArray } from "@/server-util/helpers";
 import { getOutputData, searchQuestions } from "@/app/Actions";
 
@@ -13,8 +13,9 @@ import { getOutputData, searchQuestions } from "@/app/Actions";
 interface RandomQuestionGeneratorProps {
     topics: string[];
     levels: string[];
-    components: string[];
+    components: Components;
     subject: number;
+    maxMarks: number;
 }
 
 const RandomQuestionGenerator: React.FC<RandomQuestionGeneratorProps> = ({
@@ -22,12 +23,13 @@ const RandomQuestionGenerator: React.FC<RandomQuestionGeneratorProps> = ({
     levels,
     components,
     subject,
+    maxMarks,
 }) => {
     const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
     const [selectedLevel, setSelectedLevel] = useState<string>("");
     const [selectedComponent, setSelectedComponent] = useState<string>("");
     const [selectedMinMarks, setSelectedMinMarks] = useState<number>(0);
-    const [selectedMaxMarks, setSelectedMaxMarks] = useState<number>(20);
+    const [selectedMaxMarks, setSelectedMaxMarks] = useState<number>(maxMarks);
     const [displayAsImages, setDisplayAsImages] = useState<boolean>(true);
     const [displayMarkscheme, setDisplayMarkscheme] = useState<boolean>(false);
     const [currentQuestionNum, setCurrentQuestionNum] = useState<number>(0);
@@ -132,13 +134,15 @@ const RandomQuestionGenerator: React.FC<RandomQuestionGeneratorProps> = ({
                 setSelectedTopics={setSelectedTopics}
                 value=""
                 setValue={() => {}}
-                selectedLevel={selectedLevel}
                 setSelectedLevel={setSelectedLevel}
-                selectedComponent={selectedComponent}
                 setSelectedComponent={setSelectedComponent}
                 levels={levels}
                 components={components}
                 includeSearchBar={false}
+                defaultMaxMarks={maxMarks}
+                setMinMarks={setSelectedMinMarks}
+                setMaxMarks={setSelectedMaxMarks}
+                selectedLevel={selectedLevel}
             />
             <RQGControlButtons
                 onClickGenerate={onClickGenerate}

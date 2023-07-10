@@ -18,7 +18,7 @@ const ComponentSelect: React.FC<ComponentSelectProps> = ({
     selectComponent(event.target.value);
   };
 
-  // if there is only
+  // if there is only 1 component
   if (components.length === 1)
   {
     return (

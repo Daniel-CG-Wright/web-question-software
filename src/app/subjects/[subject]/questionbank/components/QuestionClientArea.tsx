@@ -4,33 +4,41 @@ import SearchComponentCollection from "@/components/SearchComponentCollection";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import useDebounce from "@/hooks/useDebounce";
-import {OutputData, Question, SearchCriteria} from "@/types";
+import {OutputData, Question, SearchCriteria, Components} from "@/types";
 import QuestionTable from "./QuestionTable";
 import OutputView from "@/components/OutputItem";
 import { searchQuestions, getOutputData } from "@/app/Actions";
-import { }
+
 
 // base client area with all interactables.
 
 interface QuestionOutputAreaProps {
     topics: string[];
     subject: number;
+    levels: string[];
+    components: Components;
+    defaultMaxMarks: number;
 }
 
 const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
     topics,
     subject,
+    levels,
+    components,
+    defaultMaxMarks
 }) => {
     const [displayAsImages, setDisplayAsImages] = useState(true);
     const [displayMarkscheme, setDisplayMarkscheme] = useState(false);
     const router = useRouter();
     const [value, setValue] = useState("");
-    const [selectedTopics, setSelectedTopics] = useState(topics);
+    const [selectedTopics, setSelectedTopics] = useState([]);
     const [selectedLevel, setSelectedLevel] = useState("");
     const [selectedComponent, setSelectedComponent] = useState("");
     const [selectedID, setSelectedID] = useState(-1);
     const debouncedValue = useDebounce(value, 500);
     const [questions, setQuestions] = useState<Question[]>([]);
+    const [maxMarks, setMaxMarks] = useState(defaultMaxMarks);
+    const [minMarks, setMinMarks] = useState(0);
     // use outputdata, setting a default value of an empty object
     const [outputData, setOutputData] = useState<OutputData>({
         text: {
@@ -57,8 +65,8 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
             level: selectedLevel,
             component: selectedComponent,
             id: -1,
-            minMarks: 0,
-            maxMarks: 100,
+            minMarks: minMarks,
+            maxMarks: maxMarks,
             paperYear: "",
             searchInMarkscheme: false,
             subject: subject,
@@ -70,7 +78,8 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
         }
         );
 
-    }, [debouncedValue, router, selectedTopics, selectedLevel, selectedComponent]);
+    }, [debouncedValue, router, selectedTopics, selectedLevel, selectedComponent,
+    minMarks, maxMarks]);
     
     useEffect(() => {
         // if the selectedID is -1, then we don't need to get the output data
@@ -96,6 +105,10 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
                 setSelectedComponent={setSelectedComponent}
                 levels={levels}
                 components={components}
+                defaultMaxMarks={defaultMaxMarks}
+                selectedLevel={selectedLevel}
+                setMaxMarks={setMaxMarks}
+                setMinMarks={setMinMarks}
             />
             <QuestionTable
                 questions={questions}
