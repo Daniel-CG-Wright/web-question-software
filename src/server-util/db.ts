@@ -1,6 +1,7 @@
 import mysql from 'mysql';
 import { SearchCriteria, Question } from '@/types';
-import { Image, Text, PaperData, OutputData, RQGQuestionData, Components } from '@/types';
+import { Image, Text, PaperData, OutputData, RQGQuestionData, Components, SmallOutputData } from '@/types';
+import { parse } from 'path';
 // Create a connection to the database
 const connection = mysql.createConnection({
   host: 'localhost',
@@ -34,47 +35,24 @@ function selectQuery(query: string, params: any[]): Promise<any> {
 function sanitize(str: string): string {
     return str.replace(/[^A-Za-z0-9\s.,?!()\-_'"]/, '');
 }
-    
+
 /**
- * Take search criteria and return an array of questions
- * @param {object} criteria - The search criteria
- * @returns {Promise<Question[]>} - The promise resolves to the result of the query
+ * Take search criteria and return the conditions for the WHERE clause of the query.
+ * Ensure that SubjectLevel, LevelComponent are joined.
+ * @param {SearchCriteria} criteria - The search criteria
+ * @returns {string} - The conditions for the WHERE clause of the query
  */
-function dbGetQuestions(criteria: SearchCriteria): Promise<Question[]> {
+function getWhereConditions(criteria: SearchCriteria): string {
   let { text, topics, component, level, minMarks, maxMarks, id, searchInMarkscheme, paperYear, subject } = criteria;
-  // log all the search criteria
-  // if there is no subject, then return an empty array
-  if (!subject) return Promise.resolve([]);
+  let conditions = [];
+  // if there is no subject, then return an empty string
+  if (!subject) return "";
 
   // if topics is a string, convert to an array with one element
   if (typeof topics === 'string' && topics != "") topics = [topics];
 
   // create the query based on search criteria
-  let query = `
-    SELECT
-        Question.QuestionID AS QuestionID,
-        CONCAT(Paper.PaperYear, '-', LevelComponent.ComponentID, '-', SubjectLevel.LevelID) AS PaperCode,
-        Question.QuestionNumber AS QuestionNumber,
-        Question.QuestionContents AS QuestionText,
-        Question.TotalMarks AS TotalMarks,
-        (
-            SELECT
-                GROUP_CONCAT(TopicID SEPARATOR ', ')
-            FROM
-                QuestionTopic
-            WHERE
-                QuestionTopic.QuestionID = Question.QuestionID
-        ) AS Topics
-    FROM
-        Paper
-        JOIN Question ON Paper.PaperID = Question.PaperID
-        LEFT JOIN QuestionTopic ON Question.QuestionID = QuestionTopic.QuestionID
-        INNER JOIN LevelComponent ON Paper.LevelComponentID = LevelComponent.LevelComponentID
-        INNER JOIN SubjectLevel ON LevelComponent.SubjectLevelID = SubjectLevel.SubjectLevelID
-    WHERE
-        `;
-
-  let conditions: string[] = [`SubjectLevel.SubjectID = ${subject}`];
+  conditions.push(`SubjectLevel.SubjectID = ${subject}`);
 
   if (text && searchInMarkscheme === false) {
     // escape single quotes in search string
@@ -141,8 +119,47 @@ function dbGetQuestions(criteria: SearchCriteria): Promise<Question[]> {
     conditions.push(`Paper.PaperYear = ${paperYear}`);
   }
 
-  // join the conditions with AND
-  query += conditions.join(' AND ');
+  return conditions.join(' AND ');
+
+}
+
+/**
+ * Take search criteria and return an array of questions
+ * @param {SearchCriteria} criteria - The search criteria
+ * @returns {Promise<Question[]>} - The promise resolves to the result of the query
+ */
+function dbGetQuestions(criteria: SearchCriteria): Promise<Question[]> {
+  let { subject } = criteria;
+  // log all the search criteria
+  // if there is no subject, then return an empty array
+  if (!subject) return Promise.resolve([]);
+
+  // create the query based on search criteria
+  let query = `
+    SELECT
+        Question.QuestionID AS QuestionID,
+        CONCAT(Paper.PaperYear, '-', LevelComponent.ComponentID, '-', SubjectLevel.LevelID) AS PaperCode,
+        Question.QuestionNumber AS QuestionNumber,
+        Question.QuestionContents AS QuestionText,
+        Question.TotalMarks AS TotalMarks,
+        (
+            SELECT
+                GROUP_CONCAT(TopicID SEPARATOR ', ')
+            FROM
+                QuestionTopic
+            WHERE
+                QuestionTopic.QuestionID = Question.QuestionID
+        ) AS Topics
+    FROM
+        Paper
+        JOIN Question ON Paper.PaperID = Question.PaperID
+        LEFT JOIN QuestionTopic ON Question.QuestionID = QuestionTopic.QuestionID
+        INNER JOIN LevelComponent ON Paper.LevelComponentID = LevelComponent.LevelComponentID
+        INNER JOIN SubjectLevel ON LevelComponent.SubjectLevelID = SubjectLevel.SubjectLevelID
+    WHERE
+        `;
+
+  query += getWhereConditions(criteria);
 
   // add group by and order by
   query += `
@@ -440,4 +457,83 @@ function dbGetMaxMarks(subjectID: number): Promise<number> {
 }
 
 
-export { dbGetQuestions, dbGetTopics, dbGetOutputData, dbGetComponents, dbGetLevels , dbGetSubjectName, dbGetMaxMarks};
+/**
+ * This function gets the images, text and totalmarks, and question ID, for all questions in a given search criteria
+ * @param {SearchCriteria} searchCriteria - the search criteria to search for
+ * @returns {Promise<SmallOutputData[]>} - a promise for the results of the query - an array of objects containing the images, text and totalmarks, and question ID, for all questions in a given search criteria
+ */
+function dbGetExamPaperOutputData(searchCriteria: SearchCriteria): Promise<SmallOutputData[]> {
+  let { subject } = searchCriteria;
+  if (!subject) {
+    return Promise.reject('No subject specified');
+  }
+/*
+Get the question ID, total marks, question text, markscheme text, and images for all questions in a given search criteria.
+The images are returned as a string of the image IDs for the question images, and a string of the image IDs for the markscheme images, separated by commas.
+Also the topics for the question are returned as a string of the topic IDs, separated by commas.
+*/
+  let query = `
+  SELECT Question.QuestionID, Question.TotalMarks, Question.QuestionContents, Question.MarkschemeContents, 
+  GROUP_CONCAT(DISTINCT i1.ImageID) AS QuestionImages, 
+  GROUP_CONCAT(DISTINCT i2.ImageID) AS MarkschemeImages,
+  GROUP_CONCAT(DISTINCT QuestionTopic.TopicID) AS TopicIDs
+FROM Question
+LEFT JOIN images i1 ON Question.QuestionID = i1.QuestionID
+LEFT JOIN images i2 ON Question.QuestionID = i2.QuestionID AND i2.IsPartOfMarkscheme = 1
+LEFT JOIN QuestionTopic ON Question.QuestionID = QuestionTopic.QuestionID
+INNER JOIN Paper ON Question.PaperID = Paper.PaperID
+INNER JOIN LevelComponent ON Paper.LevelComponentID = LevelComponent.LevelComponentID
+INNER JOIN SubjectLevel ON LevelComponent.SubjectLevelID = SubjectLevel.SubjectLevelID
+WHERE
+${getWhereConditions(searchCriteria)}
+GROUP BY Question.QuestionID;
+`;
+
+  return selectQuery(query, [])
+    .then((results) => {
+      let outputData: SmallOutputData[] = [];
+      results.forEach((row: any) => {
+        // split the image IDs into an array
+        let questionImages: string[] = [];
+        let markschemeImages: string[] = [];
+        if (row.QuestionImages) {
+          questionImages = row.QuestionImages.split(',');
+        }
+        if (row.MarkschemeImages) {
+          markschemeImages = row.MarkschemeImages.split(',');
+        }
+        let questionTopics: string[] = [];
+        if (row.TopicIDs) {
+          questionTopics = row.TopicIDs.split(',');
+        }
+        outputData.push({
+          id: row.QuestionID,
+          totalMarks: row.TotalMarks,
+          text: {
+            questionContents: row.QuestionContents,
+            markschemeContents: row.MarkschemeContents
+          },
+          topics: questionTopics,
+          // convert the image IDs to an array of image objects which have id and isMS properties
+          images: [
+            ...questionImages.map((imageID) => {
+              return {
+                id: parseInt(imageID),
+                isMS: 0
+              };
+            }),
+            ...markschemeImages.map((imageID) => {
+              return {
+                id: parseInt(imageID),
+                isMS: 1
+              };
+            })
+          ]
+        });
+      });
+      return outputData;
+    }
+    );
+}
+
+export { dbGetQuestions, dbGetTopics, dbGetOutputData, dbGetComponents, dbGetLevels , dbGetSubjectName, dbGetMaxMarks, dbGetExamPaperOutputData };

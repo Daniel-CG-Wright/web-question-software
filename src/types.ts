@@ -70,3 +70,12 @@ export interface ToolInitData {
 export interface Components {
     [level: string]: string[],
 }
+
+// used as a way to get multiple output data bases from a single DB access
+export interface SmallOutputData {
+    id: number,
+    text: Text,
+    images: Image[],
+    totalMarks: number,
+    topics: string[],
+}
