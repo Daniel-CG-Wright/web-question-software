@@ -108,7 +108,7 @@ function dbGetQuestions(criteria: SearchCriteria): Promise<Question[]> {
             INNER JOIN DisplayComponent ON LevelComponent.DisplayComponentID = DisplayComponent.DisplayComponentID
             WHERE
               SubjectLevel.SubjectID = ${subject}
-              AND DisplayComponent.DisplayComponentID = '${component}'
+              AND DisplayComponent.DisplayComponent = '${component}'
               ${level ? `AND SubjectLevel.LevelID = '${level}'` : ''}
           )
         `;
