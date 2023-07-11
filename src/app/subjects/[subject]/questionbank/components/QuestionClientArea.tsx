@@ -39,6 +39,7 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
     const [questions, setQuestions] = useState<Question[]>([]);
     const [maxMarks, setMaxMarks] = useState(defaultMaxMarks);
     const [minMarks, setMinMarks] = useState(0);
+    const [searchInMarkscheme, setSearchInMarkscheme] = useState(false);
     // use outputdata, setting a default value of an empty object
     const [outputData, setOutputData] = useState<OutputData>({
         text: {
@@ -68,7 +69,7 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
             minMarks: minMarks,
             maxMarks: maxMarks,
             paperYear: "",
-            searchInMarkscheme: false,
+            searchInMarkscheme: searchInMarkscheme,
             subject: subject,
         };
 
@@ -79,7 +80,7 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
         );
 
     }, [debouncedValue, router, selectedTopics, selectedLevel, selectedComponent,
-    minMarks, maxMarks]);
+    minMarks, maxMarks, searchInMarkscheme]);
     
     useEffect(() => {
         // if the selectedID is -1, then we don't need to get the output data
@@ -110,6 +111,8 @@ const QuestionOutputArea: React.FC<QuestionOutputAreaProps> = ({
                 maxMarks={maxMarks}
                 minMarks={minMarks}
                 setMinMarks={setMinMarks}
+                searchInMarkscheme={searchInMarkscheme}
+                setSearchInMarkscheme={setSearchInMarkscheme}
             />
             <QuestionTable
                 questions={questions}

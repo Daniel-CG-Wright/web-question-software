@@ -24,6 +24,8 @@ interface SearchComponentCollectionProps {
     includeSearchBar?: boolean;
     minMarks: number;
     maxMarks: number;
+    searchInMarkscheme: boolean;
+    setSearchInMarkscheme: (searchInMarkscheme: boolean) => void;
 }
 
 /*
@@ -45,7 +47,9 @@ const SearchComponentCollection: React.FC<SearchComponentCollectionProps> = ({
     components,
     includeSearchBar = true,
     minMarks,
-    maxMarks
+    maxMarks,
+    searchInMarkscheme,
+    setSearchInMarkscheme,
 }) => {
 
   let componentsForSelectedLevel;
@@ -74,6 +78,8 @@ const SearchComponentCollection: React.FC<SearchComponentCollectionProps> = ({
       {includeSearchBar && <SearchInput
         value={value}
         setValue={setValue}
+        searchInMarkscheme={searchInMarkscheme}
+        setSearchInMarkscheme={setSearchInMarkscheme}
       />}
       <TopicsCombobox
         selectedTopics={selectedTopics}

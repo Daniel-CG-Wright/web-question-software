@@ -76,7 +76,7 @@ function dbGetQuestions(criteria: SearchCriteria): Promise<Question[]> {
 
   let conditions: string[] = [`SubjectLevel.SubjectID = ${subject}`];
 
-  if (text) {
+  if (text && searchInMarkscheme === false) {
     // escape single quotes in search string
     text = text.replace(/'/g, "''");
     // sanitise search string
@@ -84,6 +84,15 @@ function dbGetQuestions(criteria: SearchCriteria): Promise<Question[]> {
     // use like query to search for search string in question text
     // NOTE this could be improved with better search functionality
     conditions.push(`Question.QuestionContents LIKE '%${text}%'`);
+  }
+  else if (text && searchInMarkscheme === true) {
+    // escape single quotes in search string
+    text = text.replace(/'/g, "''");
+    // sanitise search string
+    text = sanitize(text);
+    // use like query to search for search string in question text
+    // NOTE this could be improved with better search functionality
+    conditions.push(`Question.MarkschemeContents LIKE '%${text}%'`);
   }
 
   if (topics && topics.length > 0) {
@@ -126,10 +135,6 @@ function dbGetQuestions(criteria: SearchCriteria): Promise<Question[]> {
 
   if (id > -1) {
     conditions.push(`Question.QuestionID = ${id}`);
-  }
-
-  if (searchInMarkscheme === true) {
-    conditions.push(`Question.MarkschemeContents LIKE '%${text}%'`);
   }
 
   if (paperYear) {
