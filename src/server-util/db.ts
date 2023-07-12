@@ -289,6 +289,7 @@ function dbGetOutputData(questionID: number): Promise<OutputData> {
           isMS: row.isPartOfMarkscheme,
         });
       });
+      console.log("outputData: ", outputData.images);
       return outputData;
     });
 }

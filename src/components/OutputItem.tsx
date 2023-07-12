@@ -19,8 +19,10 @@ function OutputItem({ isImage, text }: OutputItemProps): JSX.Element {
   // console.log("OutputItem: ", text);
   if ( isImage )
   {
+    console.log("text ", text)
     // convert image file to path from public folder
     text = `/questionImages/${text}.png`
+    console.log("text ", text)
 
   }
   return (
