@@ -46,6 +46,7 @@ interface OutputViewProps {
  * @returns {JSX.Element} - the output view
  */
 export default function OutputView({ outputData, isImage, displayMarkscheme }: OutputViewProps): JSX.Element {
+  console.log('OutputView: ', outputData.images);
   let outputComponents: (string)[] = [];
  if (!isImage && !displayMarkscheme) {
     outputComponents.push(outputData.text.questionContents);
@@ -59,6 +60,8 @@ export default function OutputView({ outputData, isImage, displayMarkscheme }: O
       }
     }
   }
+  console.log(displayMarkscheme)
+  console.log("chosen images: ", outputComponents);
   // clear previous output data and add new output data
   return (
     <div className="flex flex-col items-center">

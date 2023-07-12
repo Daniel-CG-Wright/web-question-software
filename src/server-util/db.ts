@@ -483,7 +483,7 @@ Also the topics for the question are returned as a string of the topic IDs, sepa
   GROUP_CONCAT(DISTINCT i2.ImageID) AS MarkschemeImages,
   GROUP_CONCAT(DISTINCT QuestionTopic.TopicID) AS TopicIDs
 FROM Question
-LEFT JOIN images i1 ON Question.QuestionID = i1.QuestionID
+LEFT JOIN images i1 ON Question.QuestionID = i1.QuestionID AND i1.IsPartOfMarkscheme = 0
 LEFT JOIN images i2 ON Question.QuestionID = i2.QuestionID AND i2.IsPartOfMarkscheme = 1
 LEFT JOIN QuestionTopic ON Question.QuestionID = QuestionTopic.QuestionID
 INNER JOIN Paper ON Question.PaperID = Paper.PaperID

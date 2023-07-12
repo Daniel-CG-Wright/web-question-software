@@ -85,6 +85,7 @@ const ExamGeneratorClientArea: React.FC<Props> = ({ subject, components, levels,
         numQuestions++;
     });
 
+    console.log(outputDatas);
     // switch components if the level changes
     const currentComponents = levels.includes(selectedLevel) ? components[selectedLevel] : components["all"];
 
