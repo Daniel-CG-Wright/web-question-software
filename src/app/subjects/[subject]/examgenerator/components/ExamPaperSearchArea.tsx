@@ -11,10 +11,10 @@ import BaseButton from "@/components/BaseButton";
 interface Props {
     components: string[];
     levels: string[];
-    SetMinMarks: (marks: number) => void;
-    SetMaxMarks: (marks: number) => void;
-    SetComponent: (component: string) => void;
-    SetLevel: (level: string) => void;
+    setMinMarks: (marks: number) => void;
+    setMaxMarks: (marks: number) => void;
+    setComponent: (component: string) => void;
+    setLevel: (level: string) => void;
     onGenerate: () => void;
     minMarks: number;
     maxMarks: number;
@@ -26,10 +26,10 @@ interface Props {
 const ExamPaperSearchArea: React.FC<Props> = ({
     components,
     levels,
-    SetMinMarks,
-    SetMaxMarks,
-    SetComponent,
-    SetLevel,
+    setMinMarks,
+    setMaxMarks,
+    setComponent,
+    setLevel,
     onGenerate,
     minMarks,
     maxMarks,
@@ -40,13 +40,13 @@ const ExamPaperSearchArea: React.FC<Props> = ({
                 <div className="flex flex-row space-x-4">
                     <ComponentSelect
                         components={components}
-                        selectComponent={SetComponent}
+                        selectComponent={setComponent}
                     />
-                    <LevelSelect levels={levels}  setSelectedLevel={SetLevel}/>
+                    <LevelSelect levels={levels}  setSelectedLevel={setLevel}/>
                 </div>
                 <MinMaxMarks
-                    setMinMarks={SetMinMarks}
-                    setMaxMarks={SetMaxMarks}
+                    setMinMarks={setMinMarks}
+                    setMaxMarks={setMaxMarks}
                     minMarks={minMarks}
                     maxMarks={maxMarks}
                 />

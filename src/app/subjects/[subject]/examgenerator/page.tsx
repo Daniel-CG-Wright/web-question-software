@@ -1,5 +1,8 @@
 // page for the exam paper generator
 import { dbGetTopics } from "@/server-util/db";
+import getInitData from "@/ServerFunctions/getInitData";
+import ExamGeneratorClientArea from "./components/ExamGeneratorClientArea";
+
 
 interface Params {
     params: { subject: number; };
@@ -13,11 +16,22 @@ const ExamGeneratorPage: React.FC<Params> = async ({ params }) => {
     //const questions = await searchQuestions(searchParams);
     const subject = params.subject;
     const topics = await dbGetTopics(subject);
+    const {
+        components,
+        levels
+    }
+        = await getInitData(subject);
     // fetching data for interactive components is performed in the output area client component.
 
     return (
         <>
             <h1>Exam Paper Generator</h1>
+            <ExamGeneratorClientArea
+                subject={subject}
+                topics={topics}
+                components={components}
+                levels={levels}
+            />
         </>
     );
 

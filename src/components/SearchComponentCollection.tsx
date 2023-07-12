@@ -6,6 +6,7 @@ import LevelSelect from "./LevelSelect";
 import ComponentSelect from "./ComponentSelect";
 import MinMaxMarks from "./MinMaxMarks";
 import { Components } from "@/types";
+import NoSearchBarComponentCollection from "./NoSearchBarComponentCollection";
 
 
 interface SearchComponentCollectionProps {
@@ -21,7 +22,6 @@ interface SearchComponentCollectionProps {
     setMaxMarks: (maxMarks: number) => void;
     levels: string[];
     components: Components;
-    includeSearchBar?: boolean;
     minMarks: number;
     maxMarks: number;
     searchInMarkscheme: boolean;
@@ -45,24 +45,12 @@ const SearchComponentCollection: React.FC<SearchComponentCollectionProps> = ({
     selectedLevel,
     levels,
     components,
-    includeSearchBar = true,
     minMarks,
     maxMarks,
     searchInMarkscheme,
     setSearchInMarkscheme,
 }) => {
-
-  let componentsForSelectedLevel;
-  if (selectedLevel == "") {
-    componentsForSelectedLevel = components["all"]
-  } else {
-    componentsForSelectedLevel = components[selectedLevel.toLowerCase()]
-  }
   
-
-  console.log("selected level: " + selectedLevel)
-  console.log("components for selected level: " + componentsForSelectedLevel)
-  console.log("components: " + components)
   return (
     <div className="
     flex
@@ -75,30 +63,25 @@ const SearchComponentCollection: React.FC<SearchComponentCollectionProps> = ({
     md:space-y-0
     m-4
     ">
-      {includeSearchBar && <SearchInput
+      <SearchInput
         value={value}
         setValue={setValue}
         searchInMarkscheme={searchInMarkscheme}
         setSearchInMarkscheme={setSearchInMarkscheme}
-      />}
-      <TopicsCombobox
+      />
+      <NoSearchBarComponentCollection
         selectedTopics={selectedTopics}
         setSelectedTopics={setSelectedTopics}
-        topics={topics}
-      />
-      <LevelSelect
+        selectedLevel={selectedLevel}
         setSelectedLevel={setSelectedLevel}
-        levels={levels}
-      />
-      <ComponentSelect
-        selectComponent={setSelectedComponent}
-        components={componentsForSelectedLevel}
-      />
-      <MinMaxMarks
+        setSelectedComponent={setSelectedComponent}
         setMinMarks={setMinMarks}
         setMaxMarks={setMaxMarks}
-        maxMarks={maxMarks}
+        levels={levels}
+        components={components}
         minMarks={minMarks}
+        maxMarks={maxMarks}
+        topics={topics}
       />
     </div>
   );

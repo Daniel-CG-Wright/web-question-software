@@ -1,6 +1,5 @@
 "use client"
 import React, { useEffect, useState } from "react";
-import SearchComponentCollection from "@/components/SearchComponentCollection";
 import RQGControlButtons from "./RQGControlButtons";
 import RQGInfo from "./RQGinfoComponent";
 import OutputView from "@/components/OutputItem";
@@ -8,7 +7,7 @@ import QuestionHeader from "@/components/QuestionHeader";
 import { Components, OutputData, RQGQuestionData, SearchCriteria } from "@/types";
 import { shuffleArray } from "@/server-util/helpers";
 import { getOutputData, searchQuestions } from "@/app/Actions";
-
+import NoSearchBarComponentCollection from "@/components/NoSearchBarComponentCollection";
 
 interface RandomQuestionGeneratorProps {
     topics: string[];
@@ -128,23 +127,21 @@ const RandomQuestionGenerator: React.FC<RandomQuestionGeneratorProps> = ({
     // get the output data from the
     return (
         <div className="flex flex-col space-y-4 m-5">
-            <SearchComponentCollection
+            <NoSearchBarComponentCollection
                 topics={topics}
-                selectedTopics={selectedTopics}
-                setSelectedTopics={setSelectedTopics}
-                value=""
-                setValue={() => {}}
-                setSelectedLevel={setSelectedLevel}
-                setSelectedComponent={setSelectedComponent}
                 levels={levels}
                 components={components}
-                includeSearchBar={false}
-                setMinMarks={setSelectedMinMarks}
-                setMaxMarks={setSelectedMaxMarks}
+                selectedTopics={selectedTopics}
+                selectedLevel={selectedLevel}
+                setSelectedComponent={setSelectedComponent}
                 minMarks={selectedMinMarks}
                 maxMarks={selectedMaxMarks}
-                selectedLevel={selectedLevel}
+                setSelectedTopics={setSelectedTopics}
+                setSelectedLevel={setSelectedLevel}
+                setMinMarks={setSelectedMinMarks}
+                setMaxMarks={setSelectedMaxMarks}
             />
+
             <RQGControlButtons
                 onClickGenerate={onClickGenerate}
                 onClickNext={onClickNext}

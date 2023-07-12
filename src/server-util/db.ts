@@ -1,7 +1,6 @@
 import mysql from 'mysql';
 import { SearchCriteria, Question } from '@/types';
-import { Image, Text, PaperData, OutputData, RQGQuestionData, Components, SmallOutputData } from '@/types';
-import { parse } from 'path';
+import { OutputData, Components, SmallOutputData } from '@/types';
 // Create a connection to the database
 const connection = mysql.createConnection({
   host: 'localhost',
@@ -263,7 +262,7 @@ function dbGetOutputData(questionID: number): Promise<OutputData> {
     WHERE
         Question.QuestionID = ?
     ORDER BY
-        Images.ImageNumber ASC;
+    Images.ImageID ASC;
     `;
 
     // each row will have the same header data, but will have different image data
@@ -462,8 +461,13 @@ function dbGetMaxMarks(subjectID: number): Promise<number> {
  * @param {SearchCriteria} searchCriteria - the search criteria to search for
  * @returns {Promise<SmallOutputData[]>} - a promise for the results of the query - an array of objects containing the images, text and totalmarks, and question ID, for all questions in a given search criteria
  */
-function dbGetExamPaperOutputData(searchCriteria: SearchCriteria): Promise<SmallOutputData[]> {
+async function dbGetExamPaperOutputData(searchCriteria: SearchCriteria): Promise<SmallOutputData[]> {
   let { subject } = searchCriteria;
+  // set the min and max marks to 0 and the max marks for the subject respectively rather than the values in the search criteria
+  // this is because the min and max marks are specified for the use of the exam paper generator, not for individual questions.
+  searchCriteria.minMarks = 0;
+  searchCriteria.maxMarks = await dbGetMaxMarks(subject);
+
   if (!subject) {
     return Promise.reject('No subject specified');
   }
@@ -489,6 +493,7 @@ ${getWhereConditions(searchCriteria)}
 GROUP BY Question.QuestionID;
 `;
 
+console.log(query);
   return selectQuery(query, [])
     .then((results) => {
       let outputData: SmallOutputData[] = [];
