@@ -26,20 +26,7 @@ const ExamGeneratorClientArea: React.FC<Props> = ({ subject, components, levels,
     const [selectedComponent, setSelectedComponent] = useState("");
     const [minMarks, setMinMarks] = useState(90);
     const [maxMarks, setMaxMarks] = useState(110);
-    const [outputData, setOutputData] = useState<OutputData>({
-        text: {
-            questionContents: "",
-            markschemeContents: "",
-        },
-        images: [],
-        paperData: {
-            year: "",
-            component: "",
-            level: "",
-        },
-        totalMarks: 0,
-        questionNumber: -1,
-    });
+    const [outputDatas, setOutputDatas] = useState<OutputData[]>([]);
 
     let totalMarks = 0;
     let numQuestions = 0;
@@ -61,25 +48,28 @@ const ExamGeneratorClientArea: React.FC<Props> = ({ subject, components, levels,
         generateExamPaper(searchCriteria, topics).then((data) => {
             /* for each smallOutputData in the data, add the marks to the total marks, increment the number of questions,
             and add the properties of the smallOutputData to the outputData */
-            console.log(data);
+            // reset total marks, num questions, and output data
+            setOutputDatas([]);
+            totalMarks = 0;
+            numQuestions = 0;
             data.forEach((smallOutputData: SmallOutputData) => {
                 totalMarks += smallOutputData.totalMarks;
                 numQuestions++;
-                setOutputData((prevOutputData) => {
-                    return {
+                setOutputDatas((prevOutputData) => {
+                    return [...prevOutputData,{
                         text: {
-                            questionContents: prevOutputData.text.questionContents + smallOutputData.text.questionContents,
-                            markschemeContents: prevOutputData.text.markschemeContents + smallOutputData.text.markschemeContents,
+                            questionContents: smallOutputData.text.questionContents,
+                            markschemeContents: smallOutputData.text.markschemeContents,
                         },
-                        images: [...prevOutputData.images, ...smallOutputData.images],
+                        images: smallOutputData.images,
                         paperData: {
                             year: "",
                             component: "",
                             level: "",
                         },
                         totalMarks: smallOutputData.totalMarks,
-                        questionNumber: -1,
-                    };
+                        questionNumber: numQuestions,
+                    }];
                 });
             }
             );
@@ -87,6 +77,13 @@ const ExamGeneratorClientArea: React.FC<Props> = ({ subject, components, levels,
         });
     };
 
+    // get the total marks and number of questions
+    totalMarks = 0;
+    numQuestions = 0;
+    outputDatas.forEach((outputDatas) => {
+        totalMarks += outputDatas.totalMarks;
+        numQuestions++;
+    });
 
     // switch components if the level changes
     const currentComponents = levels.includes(selectedLevel) ? components[selectedLevel] : components["all"];
@@ -112,11 +109,23 @@ const ExamGeneratorClientArea: React.FC<Props> = ({ subject, components, levels,
                 numQuestions={numQuestions}
                 totalMarks={totalMarks}
                 />
-            <OutputView
-                outputData={outputData}
-                isImage={displayAsImages}
-                displayMarkscheme={displayMarkscheme}
-                />
+            <div>
+            {
+outputDatas.map((outputData, index) => {
+    return (
+      <div key={index}>
+        <h2>Question {index + 1}</h2>
+        <OutputView
+          outputData={outputData}
+          isImage={displayAsImages}
+          displayMarkscheme={displayMarkscheme}
+        />
+      </div>
+    );
+  })
+  
+            }
+            </div>
         </>
     );
 

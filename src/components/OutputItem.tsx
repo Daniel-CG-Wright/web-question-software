@@ -19,10 +19,8 @@ function OutputItem({ isImage, text }: OutputItemProps): JSX.Element {
   // console.log("OutputItem: ", text);
   if ( isImage )
   {
-    console.log("text ", text)
     // convert image file to path from public folder
     text = `/questionImages/${text}.png`
-    console.log("text ", text)
 
   }
   return (
@@ -61,17 +59,13 @@ export default function OutputView({ outputData, isImage, displayMarkscheme }: O
       }
     }
   }
+  // clear previous output data and add new output data
   return (
-    
-    <div className="flex flex-col
-    w-full
-    ">
-      {
-        // for each item in outputComponents, create an OutputItem
-        outputComponents.map((item, index) => (
-          <OutputItem key={index} isImage={isImage} text={item} />
-        ))
-      }
+    <div className="flex flex-col items-center">
+      {outputComponents.map((item, index) => (
+        <OutputItem key={index} isImage={isImage} text={item} />
+      ))}
     </div>
   );
+
 }

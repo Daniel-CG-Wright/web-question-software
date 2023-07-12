@@ -45,26 +45,23 @@ export async function generateExamPaper(searchCriteria: SearchCriteria, topics: 
         let chosenTopics: string[] = [];
         // randomly select questions from each topic until the total is between minMarks and maxMarks
         while (totalMarks < minMarks || totalMarks > maxMarks) {
-            console.log("looping");
             // choose a random topic
             let topic = topics[Math.floor(Math.random() * topics.length)];
-            // if the topic has already been chosen, choose another topic
-            while (chosenTopics.includes(topic)) {
+            // if the topic has already been chosen, or if no questions are left with this topic in their topics property which have not already been chosen, choose another topic
+            while (chosenTopics.includes(topic) || questions.filter(q => q.topics.includes(topic)).length === 0) {
                 topic = topics[Math.floor(Math.random() * topics.length)];
-                if (chosenTopics.length === topics.length) {
-                    break;
-                }
             }
-            console.log("topic: " + topic);
             // add the topic to the chosen topics
             chosenTopics.push(topic);
-            // choose a random question from the topic
-            let question = questions.filter(q => q.topics.includes(topic))[Math.floor(Math.random() * questions.filter(q => q.topics.includes(topic)).length)];
+            // choose a random question from the topic which has not already been chosen
+            let question = questions.filter(q => q.topics.includes(topic) && !chosenQuestions.includes(q))[Math.floor(Math.random() * questions.filter(q => q.topics.includes(topic) && !chosenQuestions.includes(q)).length)];
+            if (!question) {
+                continue;
+            }
             // add the question to the chosen questions
             chosenQuestions.push(question);
             // add the question's marks to the total
             totalMarks += question.totalMarks;
-            console.log("totalMarks: " + totalMarks);
 
             // if the total is greater than maxMarks, remove random questions until the total is between minMarks and maxMarks
             while (totalMarks > maxMarks) {
@@ -78,8 +75,6 @@ export async function generateExamPaper(searchCriteria: SearchCriteria, topics: 
 
         }
         
-        // return the chosen questions
-        console.log("chosen questions: " + chosenQuestions);
         return chosenQuestions;
 
     })
