@@ -43,7 +43,6 @@ Also disable the dropdown arrow from highlighting when hovered by doing pointer-
     }
   
     .scrollbar::-webkit-scrollbar-track {
-      border-top-right-radius: 12px;
       border-bottom-right-radius: 12px;
       background: #f7f4ed;
       overflow: hidden;
